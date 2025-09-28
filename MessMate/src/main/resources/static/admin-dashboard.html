@@ -232,15 +232,9 @@
 
                     <div class="user-table-container">
                         <div class="table-header">
-                            <h3>Registered Users</h3>
-                            <div class="filter-controls">
-                                <select id="user-type-filter">
-                                    <option value="">All Users</option>
-                                    <option value="STUDENT">Students</option>
-                                    <option value="STAFF">Staff</option>
-                                    <option value="ADMIN">Admins</option>
-                                </select>
-                                <input type="text" id="user-search" placeholder="Search users...">
+                            <h3>All Registered Users</h3>
+                            <div class="header-actions">
+                                <button onclick="loadUsers()" class="btn btn-primary">🔄 Refresh Users</button>
                             </div>
                         </div>
                         
@@ -443,6 +437,9 @@
                             <option value="1">1 Star</option>
                         </select>
                         <input type="date" id="feedback-date-filter">
+                        <button onclick="testFeedbackAPI()" class="btn btn-info" style="margin-left: 10px;">🔧 Test API</button>
+                        <button onclick="loadFeedback()" class="btn btn-primary" style="margin-left: 5px;">🔄 Reload</button>
+                        <button onclick="createSampleFeedback()" class="btn btn-success" style="margin-left: 5px;">➕ Create Sample Data</button>
                     </div>
 
                     <div id="feedback-list" class="feedback-container">
@@ -583,6 +580,20 @@
                                 </div>
                                 <button type="submit" class="primary-btn">Change Password</button>
                             </form>
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                <p style="font-size: 0.9rem; color: #718096; margin-bottom: 10px;">
+                                    <strong>Note:</strong> Password changes are saved to the database and will persist across sessions.
+                                </p>
+                                <div style="margin-bottom: 10px;">
+                                    <button onclick="ensureAdminExists()" class="btn btn-primary" style="margin-right: 10px;">🔧 Ensure Admin Exists</button>
+                                    <button onclick="loadAdminProfile()" class="btn btn-info" style="margin-right: 10px;">🔄 Reload Profile</button>
+                                </div>
+                                <div>
+                                    <button onclick="debugAdminUser()" class="btn btn-warning" style="margin-right: 10px;">🔍 Debug User</button>
+                                    <button onclick="verifyAdminPassword()" class="btn btn-success" style="margin-right: 10px;">🔐 Verify Password</button>
+                                    <button onclick="testAdminAPI()" class="btn btn-secondary">🔧 Test API</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

@@ -772,17 +772,26 @@ function loadFeedbackData() {
 
 async function loadStaffFeedback() {
     try {
+        // Show loading state
+        document.getElementById('staff-feedback-list').innerHTML = '<div class="loading-state">Loading feedback...</div>';
+        
         const response = await fetch('/api/feedback/all');
         if (response.ok) {
-            const feedback = await response.json();
-            displayFeedbackList(feedback);
+            const result = await response.json();
+            console.log('Staff Feedback API response:', result);
+            
+            if (result.success && result.data) {
+                displayFeedbackList(result.data);
+            } else {
+                document.getElementById('staff-feedback-list').innerHTML = '<div class="empty-state">No feedback received yet</div>';
+            }
         } else {
             console.error('Failed to load feedback');
-            document.getElementById('staff-feedback-list').innerHTML = '<div class="empty-state">Failed to load feedback</div>';
+            document.getElementById('staff-feedback-list').innerHTML = '<div class="error-state">Failed to load feedback</div>';
         }
     } catch (error) {
         console.error('Error loading feedback:', error);
-        document.getElementById('staff-feedback-list').innerHTML = '<div class="empty-state">Error loading feedback</div>';
+        document.getElementById('staff-feedback-list').innerHTML = '<div class="error-state">Error loading feedback</div>';
     }
 }
 
@@ -797,14 +806,14 @@ function displayFeedbackList(feedback) {
     container.innerHTML = feedback.map(fb => `
         <div class="feedback-item" onclick="viewFeedbackDetails(${fb.id})">
             <div class="feedback-header">
-                <span class="feedback-student">${fb.studentName}</span>
+                <span class="feedback-student">${fb.studentName || 'Unknown Student'}</span>
                 <span class="feedback-rating">${'★'.repeat(fb.rating || 0)}${'☆'.repeat(5-(fb.rating || 0))}</span>
             </div>
-            <div class="feedback-content">${fb.message}</div>
+            <div class="feedback-content">${fb.message || 'No message provided'}</div>
             <div class="feedback-meta">
                 <span>${formatDate(fb.createdAt)}</span>
-                <span class="feedback-type">${fb.feedbackType.replace('_', ' ')}</span>
-                <span class="feedback-status ${fb.status.toLowerCase()}">${fb.status}</span>
+                <span class="feedback-type">${(fb.feedbackType || 'GENERAL').replace('_', ' ')}</span>
+                <span class="feedback-status ${(fb.status || 'PENDING').toLowerCase()}">${fb.status || 'PENDING'}</span>
             </div>
         </div>
     `).join('');
@@ -848,35 +857,43 @@ async function viewFeedbackDetails(feedbackId) {
     try {
         const response = await fetch(`/api/feedback/${feedbackId}`);
         if (response.ok) {
-            const feedback = await response.json();
-            currentFeedbackId = feedbackId;
+            const result = await response.json();
+            console.log('Feedback details API response:', result);
             
-            document.getElementById('feedback-details').innerHTML = `
-                <div class="feedback-detail">
-                    <h4>From: ${feedback.studentName}</h4>
-                    <div class="feedback-info">
-                        <span><strong>Type:</strong> ${feedback.feedbackType.replace('_', ' ')}</span>
-                        <span><strong>Rating:</strong> ${'★'.repeat(feedback.rating || 0)}${'☆'.repeat(5-(feedback.rating || 0))}</span>
-                        <span><strong>Status:</strong> ${feedback.status}</span>
-                    </div>
-                    <div class="feedback-message">
-                        <strong>Message:</strong>
-                        <p>${feedback.message}</p>
-                    </div>
-                    ${feedback.staffReply ? `
-                        <div class="staff-reply">
-                            <strong>Staff Reply:</strong>
-                            <p>${feedback.staffReply}</p>
-                            <small>Replied by: ${feedback.repliedByName} on ${formatDate(feedback.repliedAt)}</small>
+            if (result.success && result.data) {
+                const feedback = result.data;
+                currentFeedbackId = feedbackId;
+                
+                document.getElementById('feedback-details').innerHTML = `
+                    <div class="feedback-detail">
+                        <h4>From: ${feedback.studentName || 'Unknown Student'}</h4>
+                        <div class="feedback-info">
+                            <span><strong>Email:</strong> ${feedback.studentEmail || 'N/A'}</span>
+                            <span><strong>Type:</strong> ${(feedback.feedbackType || 'GENERAL').replace('_', ' ')}</span>
+                            <span><strong>Rating:</strong> ${'★'.repeat(feedback.rating || 0)}${'☆'.repeat(5-(feedback.rating || 0))} (${feedback.rating || 0}/5)</span>
+                            <span><strong>Status:</strong> ${feedback.status || 'PENDING'}</span>
                         </div>
-                    ` : ''}
-                    <div class="feedback-timestamp">
-                        <small>Submitted: ${formatDate(feedback.createdAt)}</small>
+                        <div class="feedback-message">
+                            <strong>Message:</strong>
+                            <p>${feedback.message || 'No message provided'}</p>
+                        </div>
+                        ${feedback.staffReply ? `
+                            <div class="staff-reply">
+                                <strong>Staff Reply:</strong>
+                                <p>${feedback.staffReply}</p>
+                                <small>Replied by: ${feedback.repliedByName || 'Staff'} on ${formatDate(feedback.repliedAt)}</small>
+                            </div>
+                        ` : ''}
+                        <div class="feedback-timestamp">
+                            <small>Submitted: ${formatDate(feedback.createdAt)}</small>
+                        </div>
                     </div>
-                </div>
-            `;
-            
-            document.getElementById('feedback-modal').style.display = 'block';
+                `;
+                
+                document.getElementById('feedback-modal').style.display = 'block';
+            } else {
+                showNotification('Failed to load feedback details', 'error');
+            }
         } else {
             showNotification('Failed to load feedback details', 'error');
         }
@@ -944,15 +961,20 @@ async function sendFeedbackReply(feedbackId, replyMessage) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                staffReply: replyMessage,
-                repliedBy: loggedInUser.id || loggedInUser.staffId
+                staffEmail: loggedInUser.email || 'staff@messmate.com',
+                reply: replyMessage
             })
         });
         
         if (response.ok) {
-            showNotification('Reply sent successfully', 'success');
-            loadStaffFeedback();
-            loadFeedbackStats();
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Reply sent successfully', 'success');
+                loadStaffFeedback();
+                loadFeedbackStats();
+            } else {
+                showNotification(result.message || 'Failed to send reply', 'error');
+            }
         } else {
             const error = await response.json();
             showNotification(error.message || 'Failed to send reply', 'error');
@@ -973,17 +995,37 @@ function closeFeedbackModal() {
 // Load feedback statistics for overview
 async function loadFeedbackStats() {
     try {
-        const response = await fetch('/api/feedback/stats/pending');
+        const response = await fetch('/api/feedback/stats/pending-count');
         if (response.ok) {
-            const pendingCount = await response.json();
-            document.getElementById('pending-feedback').textContent = pendingCount;
+            const result = await response.json();
+            console.log('Feedback stats API response:', result);
+            
+            if (result.success) {
+                const pendingCount = result.data || 0;
+                const pendingElement = document.getElementById('pending-feedback');
+                if (pendingElement) {
+                    pendingElement.textContent = pendingCount;
+                }
+            } else {
+                console.error('Failed to load feedback stats');
+                const pendingElement = document.getElementById('pending-feedback');
+                if (pendingElement) {
+                    pendingElement.textContent = '0';
+                }
+            }
         } else {
             console.error('Failed to load feedback stats');
-            document.getElementById('pending-feedback').textContent = '0';
+            const pendingElement = document.getElementById('pending-feedback');
+            if (pendingElement) {
+                pendingElement.textContent = '0';
+            }
         }
     } catch (error) {
         console.error('Error loading feedback stats:', error);
-        document.getElementById('pending-feedback').textContent = '0';
+        const pendingElement = document.getElementById('pending-feedback');
+        if (pendingElement) {
+            pendingElement.textContent = '0';
+        }
     }
 }
 

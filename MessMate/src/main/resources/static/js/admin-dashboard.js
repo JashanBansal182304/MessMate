@@ -77,11 +77,17 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAdminDashboard();
     setupNavigation();
     loadAdminInfo();
+    loadAdminProfile(); // Load admin profile from database
     updateStats();
     loadMenus();
     loadUsers();
     loadComplaints();
-    loadFeedback();
+    
+    // Test API connectivity first
+    testFeedbackAPI().then(() => {
+        loadFeedback();
+    });
+    
     loadStudentDetails();
     loadStaffManagement();
     setupAdminChangePasswordForm();
@@ -92,17 +98,27 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('staff-shift-filter').addEventListener('change', filterStaff);
     document.getElementById('staff-search').addEventListener('input', searchStaff);
     
+    // User management will only show all users - no filtering needed
+    
     // Set today's date as default
     document.getElementById('menu-date').value = new Date().toISOString().split('T')[0];
     
     // Add event listeners
     document.getElementById('menu-form').addEventListener('submit', addMenu);
-    document.getElementById('user-type-filter').addEventListener('change', filterUsers);
+    
+    // Add feedback filter event listeners
+    const feedbackRatingFilter = document.getElementById('feedback-rating-filter');
+    const feedbackDateFilter = document.getElementById('feedback-date-filter');
+    
+    if (feedbackRatingFilter) {
+        feedbackRatingFilter.addEventListener('change', filterFeedback);
+    }
+    if (feedbackDateFilter) {
+        feedbackDateFilter.addEventListener('change', filterFeedback);
+    }
     document.getElementById('user-search').addEventListener('input', searchUsers);
     document.getElementById('complaint-status-filter').addEventListener('change', filterComplaints);
     document.getElementById('complaint-priority-filter').addEventListener('change', filterComplaints);
-    document.getElementById('feedback-rating-filter').addEventListener('change', filterFeedback);
-    document.getElementById('feedback-date-filter').addEventListener('change', filterFeedback);
     document.getElementById('student-search').addEventListener('input', searchStudents);
     
     // Auto-update stats every 30 seconds
@@ -386,30 +402,321 @@ async function loadMenus() {
     }
 }
 
-function loadUsers() {
+async function loadUsers() {
     const tbody = document.getElementById('users-table-body');
-    console.log('Loading users, total count:', users.length);
-    console.log('Users data:', users);
     
-    if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No users registered yet</td></tr>';
+    try {
+        // Show loading state
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-state">🔄 Loading users from database...</td></tr>';
+        
+        console.log('🚀 Fetching users from database...');
+        
+        // Fetch users from database
+        const response = await fetch('/api/users/all', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        console.log('📡 Users API response:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Users data received:', result);
+        
+        if (result.success && result.data && result.data.length > 0) {
+            const users = result.data;
+            
+            // Update user statistics
+            await loadUserStats();
+            
+            // Display users in table
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <strong>${user.name}</strong>
+                            ${user.phone ? `<small>${user.phone}</small>` : ''}
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td><span class="user-type-badge ${user.userType.toLowerCase()}">${user.userType}</span></td>
+                    <td>${user.rollNumber || '-'}</td>
+                    <td>${user.hostel || '-'}</td>
+                    <td>${user.room || '-'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" onclick="viewUser(${user.id})" title="View Details">👁️</button>
+                            <button class="action-btn edit-btn" onclick="editUser(${user.id})" title="Edit User">✏️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            console.log(`📊 Loaded ${users.length} users successfully`);
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <div>
+                            <h3>👥 No users found</h3>
+                            <p>No users are registered in the system yet.</p>
+                            <button onclick="loadUsers()" class="btn btn-primary">🔄 Refresh</button>
+                            <button onclick="ensureAdminExists()" class="btn btn-success">➕ Create Sample Users</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading users:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="error-state">
+                    <div>
+                        <h3>⚠️ Error Loading Users</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Make sure the Spring Boot application is running and the database is connected.</p>
+                        <button onclick="loadUsers()" class="btn btn-primary">🔄 Try Again</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Function to load user statistics
+async function loadUserStats() {
+    try {
+        console.log('📊 Loading user statistics...');
+        
+        const response = await fetch('/api/users/stats', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('📊 User stats received:', result);
+            
+            if (result.success && result.data) {
+                const stats = result.data;
+                
+                // Update stat counters
+                const studentCountEl = document.getElementById('student-count');
+                const staffCountEl = document.getElementById('staff-count');
+                const adminCountEl = document.getElementById('admin-count');
+                
+                if (studentCountEl) studentCountEl.textContent = stats.students || 0;
+                if (staffCountEl) staffCountEl.textContent = stats.staff || 0;
+                if (adminCountEl) adminCountEl.textContent = stats.admins || 0;
+                
+                console.log(`📊 Stats updated - Students: ${stats.students}, Staff: ${stats.staff}, Admins: ${stats.admins}`);
+            }
+        } else {
+            console.warn('⚠️ Failed to load user statistics');
+        }
+    } catch (error) {
+        console.error('❌ Error loading user statistics:', error);
+    }
+}
+
+// Function to filter users by type
+async function filterUsers() {
+    const filterValue = document.getElementById('user-type-filter').value;
+    const tbody = document.getElementById('users-table-body');
+    
+    try {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-state">🔄 Filtering users...</td></tr>';
+        
+        console.log('🔍 Filtering users by type:', filterValue || 'ALL');
+        console.log('🔍 Filter value details:', {
+            value: filterValue,
+            type: typeof filterValue,
+            length: filterValue ? filterValue.length : 0
+        });
+        
+        let url = '/api/users/all';
+        if (filterValue && filterValue.trim() !== '') {
+            url = `/api/users/by-type/${filterValue.trim()}`;
+        }
+        
+        console.log('🌐 Making request to:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        console.log('📡 Response status:', response.status, response.statusText);
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('🔍 Filtered users result:', result);
+            console.log('🔍 Data array length:', result.data ? result.data.length : 'No data');
+            
+            if (result.success && result.data) {
+                if (result.data.length > 0) {
+                    displayUsersInTable(result.data);
+                    console.log(`✅ Displayed ${result.data.length} users for filter: ${filterValue || 'ALL'}`);
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <div>
+                                    <h3>👥 No ${filterValue ? filterValue.toLowerCase() + 's' : 'users'} found</h3>
+                                    <p>No users match the selected filter "${filterValue || 'ALL'}".</p>
+                                    <button onclick="loadUsers()" class="btn btn-primary">🔄 Show All Users</button>
+                                    <button onclick="testUserAPI('${filterValue}')" class="btn btn-info">🔧 Test Filter API</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } else {
+                console.error('❌ API returned unsuccessful result:', result);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="error-state">
+                            <div>
+                                <h3>⚠️ API Error</h3>
+                                <p>API returned: ${result.message || 'Unknown error'}</p>
+                                <button onclick="loadUsers()" class="btn btn-primary">🔄 Show All Users</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        } else {
+            const errorText = await response.text();
+            console.error('❌ HTTP Error Response:', errorText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error('❌ Error filtering users:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="error-state">
+                    <div>
+                        <h3>⚠️ Filter Error</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Filter:</strong> ${filterValue || 'ALL'}</p>
+                        <button onclick="loadUsers()" class="btn btn-primary">🔄 Show All Users</button>
+                        <button onclick="testUserAPI('${filterValue}')" class="btn btn-info">🔧 Test API</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Function to search users
+async function searchUsers() {
+    const searchQuery = document.getElementById('user-search').value.trim();
+    const tbody = document.getElementById('users-table-body');
+    
+    if (searchQuery.length < 2) {
+        loadUsers(); // Load all users if search query is too short
         return;
     }
     
+    try {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-state">🔍 Searching users...</td></tr>';
+        
+        console.log('🔍 Searching users with query:', searchQuery);
+        
+        const response = await fetch(`/api/users/search?query=${encodeURIComponent(searchQuery)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('🔍 Search results:', result);
+            
+            if (result.success && result.data && result.data.length > 0) {
+                displayUsersInTable(result.data);
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div>
+                                <h3>🔍 No results found</h3>
+                                <p>No users found matching "${searchQuery}"</p>
+                                <button onclick="loadUsers()" class="btn btn-primary">🔄 Show All Users</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        } else {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error('❌ Error searching users:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="error-state">
+                    <div>
+                        <h3>⚠️ Search Error</h3>
+                        <p>Error: ${error.message}</p>
+                        <button onclick="loadUsers()" class="btn btn-primary">🔄 Try Again</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Helper function to display users in table
+function displayUsersInTable(users) {
+    const tbody = document.getElementById('users-table-body');
+    
     tbody.innerHTML = users.map(user => `
         <tr>
-            <td>${user.name}</td>
+            <td>
+                <div class="user-info">
+                    <strong>${user.name}</strong>
+                    ${user.phone ? `<small>${user.phone}</small>` : ''}
+                </div>
+            </td>
             <td>${user.email}</td>
-            <td><span class="user-type-badge">${user.userType}</span></td>
+            <td><span class="user-type-badge ${user.userType.toLowerCase()}">${user.userType}</span></td>
             <td>${user.rollNumber || '-'}</td>
             <td>${user.hostel || '-'}</td>
             <td>${user.room || '-'}</td>
             <td>
-                <button class="action-button" onclick="viewUser(${user.id})">View</button>
-                <button class="action-button" onclick="editUser(${user.id})">Edit</button>
+                <div class="action-buttons">
+                    <button class="action-btn view-btn" onclick="viewUser(${user.id})" title="View Details">👁️</button>
+                    <button class="action-btn edit-btn" onclick="editUser(${user.id})" title="Edit User">✏️</button>
+                </div>
             </td>
         </tr>
     `).join('');
+}
+
+// Debounce function for search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
 
 function loadComplaints() {
@@ -442,32 +749,370 @@ function loadComplaints() {
     `).join('');
 }
 
-function loadFeedback() {
+async function loadFeedback() {
     const container = document.getElementById('feedback-list');
-    console.log('Loading feedback:', feedback);
     
-    if (feedback.length === 0) {
-        container.innerHTML = '<div class="empty-state">No feedback submitted yet</div>';
+    if (!container) {
+        console.error('Feedback container not found!');
         return;
     }
     
-    container.innerHTML = feedback.map(fb => `
+    try {
+        // Show loading state
+        container.innerHTML = '<div class="loading-state">🔄 Loading feedback from database...</div>';
+        
+        console.log('🚀 Starting to fetch feedback from API...');
+        
+        // Fetch feedback from database
+        const response = await fetch('/api/feedback/all', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('📡 Response received:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Feedback API response:', result);
+        console.log('📊 Response success:', result.success);
+        console.log('📋 Response data:', result.data);
+        console.log('📈 Data length:', result.data ? result.data.length : 0);
+        
+        if (result.success && result.data && result.data.length > 0) {
+            const feedbackData = result.data;
+            
+            // Update feedback stats
+            updateFeedbackStats(feedbackData);
+            
+            container.innerHTML = feedbackData.map(fb => `
+                <div class="feedback-card">
+                    <div class="feedback-header">
+                        <div class="feedback-student-info">
+                            <span class="feedback-student">${fb.studentName || 'Unknown Student'}</span>
+                            <span class="feedback-email">${fb.studentEmail || ''}</span>
+                        </div>
+                        <div class="feedback-meta">
+                            <span class="feedback-type">${fb.feedbackType || 'GENERAL'}</span>
+                            <span class="feedback-date">${formatDate(fb.createdAt)}</span>
+                        </div>
+                    </div>
+                    <div class="feedback-rating">
+                        <span class="rating-label">Rating:</span>
+                        <span class="star-display">${'★'.repeat(fb.rating)}${'☆'.repeat(5-fb.rating)}</span>
+                        <span class="rating-number">(${fb.rating}/5)</span>
+                    </div>
+                    <div class="feedback-message">"${fb.message || 'No message provided'}"</div>
+                    <div class="feedback-status">
+                        <span class="status-badge status-${fb.status.toLowerCase()}">${fb.status}</span>
+                        ${fb.staffReply ? `<div class="staff-reply"><strong>Staff Reply:</strong> ${fb.staffReply}</div>` : ''}
+                    </div>
+                    <div class="feedback-actions">
+                        ${fb.status === 'PENDING' ? `
+                            <button onclick="updateFeedbackStatus(${fb.id}, 'REVIEWED')" class="action-btn review-btn">Mark as Reviewed</button>
+                            <button onclick="replyToFeedback(${fb.id})" class="action-btn reply-btn">Reply</button>
+                        ` : ''}
+                        ${fb.status === 'REVIEWED' ? `
+                            <button onclick="updateFeedbackStatus(${fb.id}, 'RESOLVED')" class="action-btn resolve-btn">Mark as Resolved</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>📭 No feedback found</h3>
+                    <p>No feedback has been submitted yet, or there might be a database connection issue.</p>
+                    <button onclick="loadFeedback()" class="btn btn-primary">🔄 Try Again</button>
+                    <button onclick="testFeedbackAPI()" class="btn btn-info">🔧 Test Connection</button>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading feedback:', error);
+        console.error('🔍 Error details:', error.message);
+        console.error('🌐 Make sure the Spring Boot application is running on http://localhost:8080');
+        
+        container.innerHTML = `
+            <div class="error-state">
+                <h3>⚠️ Connection Error</h3>
+                <p><strong>Error:</strong> ${error.message}</p>
+                <p>Make sure:</p>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li>Spring Boot application is running</li>
+                    <li>Database is connected</li>
+                    <li>API endpoint /api/feedback/all is accessible</li>
+                </ul>
+                <button onclick="loadFeedback()" class="btn btn-primary">🔄 Retry</button>
+                <button onclick="testFeedbackAPI()" class="btn btn-info">🔧 Test API</button>
+            </div>
+        `;
+    }
+}
+
+// Test function to check API connectivity
+async function testFeedbackAPI() {
+    console.log('Testing feedback API connectivity...');
+    try {
+        // First test basic API connectivity
+        console.log('Step 1: Testing basic API...');
+        const helloResponse = await fetch('/api/test/hello');
+        console.log('Hello API Response:', helloResponse.status);
+        
+        if (helloResponse.ok) {
+            const helloResult = await helloResponse.json();
+            console.log('Hello API Success:', helloResult);
+        }
+        
+        // Test database connectivity
+        console.log('Step 2: Testing database connectivity...');
+        const dbResponse = await fetch('/api/test/database-status');
+        console.log('Database API Response:', dbResponse.status);
+        
+        if (dbResponse.ok) {
+            const dbResult = await dbResponse.json();
+            console.log('Database API Success:', dbResult);
+        }
+        
+        // Test feedback API
+        console.log('Step 3: Testing feedback API...');
+        const response = await fetch('/api/feedback/all');
+        console.log('Feedback API - Response status:', response.status);
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Feedback API - Success! Data:', result);
+            return result;
+        } else {
+            console.error('Feedback API - Failed with status:', response.status);
+            const errorText = await response.text();
+            console.error('Feedback API - Error response:', errorText);
+        }
+    } catch (error) {
+        console.error('API Test - Network error:', error);
+        console.error('Make sure the Spring Boot application is running on http://localhost:8080');
+    }
+}
+
+// Function to manually test API from browser console
+window.testAPI = testFeedbackAPI;
+
+// Function to create sample feedback data
+async function createSampleFeedback() {
+    try {
+        console.log('🎯 Creating sample feedback data...');
+        const response = await fetch('/api/test/create-sample-feedback', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Sample feedback creation result:', result);
+            alert('Sample feedback data creation attempted. Check console for details.');
+            // Reload feedback after creating sample data
+            loadFeedback();
+        } else {
+            console.error('❌ Failed to create sample feedback');
+        }
+    } catch (error) {
+        console.error('❌ Error creating sample feedback:', error);
+    }
+}
+
+// Make it available globally
+window.createSampleFeedback = createSampleFeedback;
+
+// Function to update feedback statistics
+function updateFeedbackStats(feedbackData) {
+    const totalFeedback = feedbackData.length;
+    const avgRating = feedbackData.length > 0 ? 
+        (feedbackData.reduce((sum, fb) => sum + fb.rating, 0) / feedbackData.length).toFixed(1) : 0;
+    
+    // Update stats in the UI
+    const totalFeedbackElement = document.getElementById('total-feedback');
+    if (totalFeedbackElement) {
+        totalFeedbackElement.textContent = totalFeedback;
+    }
+    
+    // Update average ratings by type
+    const foodFeedback = feedbackData.filter(fb => fb.feedbackType === 'FOOD_QUALITY');
+    const serviceFeedback = feedbackData.filter(fb => fb.feedbackType === 'SERVICE');
+    
+    const avgFoodRating = foodFeedback.length > 0 ? 
+        (foodFeedback.reduce((sum, fb) => sum + fb.rating, 0) / foodFeedback.length).toFixed(1) : 0;
+    const avgServiceRating = serviceFeedback.length > 0 ? 
+        (serviceFeedback.reduce((sum, fb) => sum + fb.rating, 0) / serviceFeedback.length).toFixed(1) : 0;
+    
+    const avgFoodElement = document.getElementById('avg-food-rating');
+    const avgServiceElement = document.getElementById('avg-service-rating');
+    
+    if (avgFoodElement) avgFoodElement.textContent = avgFoodRating;
+    if (avgServiceElement) avgServiceElement.textContent = avgServiceRating;
+}
+
+// Function to update feedback status
+async function updateFeedbackStatus(feedbackId, newStatus) {
+    try {
+        const response = await fetch(`/api/feedback/${feedbackId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                alert(`Feedback status updated to ${newStatus}`);
+                loadFeedback(); // Reload feedback list
+            } else {
+                alert('Failed to update feedback status: ' + result.message);
+            }
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error updating feedback status:', error);
+        alert('Error updating feedback status. Please try again.');
+    }
+}
+
+// Function to reply to feedback
+async function replyToFeedback(feedbackId) {
+    const reply = prompt('Enter your reply to this feedback:');
+    if (!reply) return;
+    
+    // Get admin email from session or use default
+    const adminEmail = 'admin@messmate.com'; // You might want to get this from session
+    
+    try {
+        const response = await fetch(`/api/feedback/${feedbackId}/reply`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                staffEmail: adminEmail,
+                reply: reply 
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                alert('Reply sent successfully!');
+                loadFeedback(); // Reload feedback list
+            } else {
+                alert('Failed to send reply: ' + result.message);
+            }
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error sending reply:', error);
+        alert('Error sending reply. Please try again.');
+    }
+}
+
+// Function to filter feedback based on rating and date
+async function filterFeedback() {
+    const ratingFilter = document.getElementById('feedback-rating-filter')?.value;
+    const dateFilter = document.getElementById('feedback-date-filter')?.value;
+    
+    try {
+        let url = '/api/feedback/all';
+        const params = new URLSearchParams();
+        
+        // Apply rating filter if selected
+        if (ratingFilter) {
+            url = `/api/feedback/rating/${ratingFilter}`;
+        }
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('Filtered feedback API response:', result);
+        
+        if (result.success && result.data) {
+            let feedbackData = result.data;
+            
+            // Apply date filter if selected
+            if (dateFilter) {
+                const filterDate = new Date(dateFilter);
+                feedbackData = feedbackData.filter(fb => {
+                    const feedbackDate = new Date(fb.createdAt);
+                    return feedbackDate.toDateString() === filterDate.toDateString();
+                });
+            }
+            
+            // Update feedback stats and display
+            updateFeedbackStats(feedbackData);
+            displayFilteredFeedback(feedbackData);
+        } else {
+            document.getElementById('feedback-list').innerHTML = '<div class="empty-state">No feedback found matching the filters</div>';
+        }
+        
+    } catch (error) {
+        console.error('Error filtering feedback:', error);
+        document.getElementById('feedback-list').innerHTML = '<div class="error-state">Error filtering feedback. Please try again.</div>';
+    }
+}
+
+// Function to display filtered feedback (similar to loadFeedback but without API call)
+function displayFilteredFeedback(feedbackData) {
+    const container = document.getElementById('feedback-list');
+    
+    if (feedbackData.length === 0) {
+        container.innerHTML = '<div class="empty-state">No feedback found matching the filters</div>';
+        return;
+    }
+    
+    container.innerHTML = feedbackData.map(fb => `
         <div class="feedback-card">
             <div class="feedback-header">
-                <span class="feedback-student">${fb.student}</span>
-                <span class="feedback-date">${formatDate(fb.createdAt || fb.date)}</span>
-            </div>
-            <div class="feedback-ratings">
-                <div class="rating-item">
-                    <span class="rating-label">Food:</span>
-                    <span class="star-display">${'★'.repeat(fb.foodRating)}${'☆'.repeat(5-fb.foodRating)}</span>
+                <div class="feedback-student-info">
+                    <span class="feedback-student">${fb.studentName || 'Unknown Student'}</span>
+                    <span class="feedback-email">${fb.studentEmail || ''}</span>
                 </div>
-                <div class="rating-item">
-                    <span class="rating-label">Service:</span>
-                    <span class="star-display">${'★'.repeat(fb.serviceRating)}${'☆'.repeat(5-fb.serviceRating)}</span>
+                <div class="feedback-meta">
+                    <span class="feedback-type">${fb.feedbackType || 'GENERAL'}</span>
+                    <span class="feedback-date">${formatDate(fb.createdAt)}</span>
                 </div>
             </div>
-            <div class="feedback-comment">"${fb.comment}"</div>
+            <div class="feedback-rating">
+                <span class="rating-label">Rating:</span>
+                <span class="star-display">${'★'.repeat(fb.rating)}${'☆'.repeat(5-fb.rating)}</span>
+                <span class="rating-number">(${fb.rating}/5)</span>
+            </div>
+            <div class="feedback-message">"${fb.message || 'No message provided'}"</div>
+            <div class="feedback-status">
+                <span class="status-badge status-${fb.status.toLowerCase()}">${fb.status}</span>
+                ${fb.staffReply ? `<div class="staff-reply"><strong>Staff Reply:</strong> ${fb.staffReply}</div>` : ''}
+            </div>
+            <div class="feedback-actions">
+                ${fb.status === 'PENDING' ? `
+                    <button onclick="updateFeedbackStatus(${fb.id}, 'REVIEWED')" class="action-btn review-btn">Mark as Reviewed</button>
+                    <button onclick="replyToFeedback(${fb.id})" class="action-btn reply-btn">Reply</button>
+                ` : ''}
+                ${fb.status === 'REVIEWED' ? `
+                    <button onclick="updateFeedbackStatus(${fb.id}, 'RESOLVED')" class="action-btn resolve-btn">Mark as Resolved</button>
+                ` : ''}
+            </div>
         </div>
     `).join('');
 }
@@ -573,8 +1218,13 @@ function addNewUser(userData) {
     
     users.push(newUser);
     saveDataToStorage(); // Save to localStorage
+    
+    // Auto-refresh user management table
     loadUsers();
-    updateStats(); // Update stats when new user is added
+    loadUserStats(); // Update user statistics
+    updateStats(); // Update general stats
+    
+    console.log('✅ New user added and user management refreshed');
     return newUser;
 }
 
@@ -1290,7 +1940,7 @@ function logout() {
 function setupAdminChangePasswordForm() {
     const changePasswordForm = document.getElementById('admin-change-password-form');
     if (changePasswordForm) {
-        changePasswordForm.addEventListener('submit', function(e) {
+        changePasswordForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const currentPassword = document.getElementById('admin-current-password').value;
@@ -1308,36 +1958,372 @@ function setupAdminChangePasswordForm() {
                 return;
             }
             
-            // Get current admin user data
-            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-            if (!loggedInUser || loggedInUser.email !== 'admin@messmate.com') {
-                showNotification('Admin user not found!', 'error');
-                return;
-            }
+            // Get current admin email (default or from localStorage)
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+            const adminEmail = loggedInUser.email || 'admin@messmate.com';
             
-            // For admin, the default password is 'admin123'
-            if (currentPassword !== loggedInUser.password) {
-                showNotification('Current password is incorrect!', 'error');
-                return;
-            }
-            
-            // Update password in localStorage
-            loggedInUser.password = newPassword;
-            localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-            
-            // Update in admin data if it exists
-            const adminData = JSON.parse(localStorage.getItem('messmate_admin_data')) || {};
-            adminData.adminPassword = newPassword;
-            adminData.lastUpdated = new Date().toISOString();
-            localStorage.setItem('messmate_admin_data', JSON.stringify(adminData));
-            
-            // Clear form
-            changePasswordForm.reset();
-            
-            showNotification('Admin password changed successfully!', 'success');
+            // Call API to change password
+            await changeAdminPassword(adminEmail, currentPassword, newPassword, changePasswordForm);
         });
     }
 }
+
+// Function to change admin password via API
+async function changeAdminPassword(email, currentPassword, newPassword, form) {
+    try {
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '🔄 Changing Password...';
+        submitBtn.disabled = true;
+        
+        console.log('🔐 Attempting to change admin password for:', email);
+        
+        const response = await fetch('/api/admin/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            })
+        });
+        
+        console.log('📡 Password change response:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Password change result:', result);
+        
+        if (result.success) {
+            // Update localStorage with new password
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+            loggedInUser.password = newPassword;
+            localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+            
+            // Clear form
+            form.reset();
+            
+            // Show success message
+            showNotification('✅ Password changed successfully in database!', 'success');
+            
+            console.log('🎉 Admin password updated successfully in database');
+        } else {
+            showNotification('❌ ' + (result.message || 'Failed to change password'), 'error');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error changing password:', error);
+        showNotification('❌ Error: ' + error.message, 'error');
+    } finally {
+        // Restore button state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Change Password';
+        submitBtn.disabled = false;
+    }
+}
+
+// Function to load admin profile from database
+async function loadAdminProfile() {
+    try {
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+        const adminEmail = loggedInUser.email || 'admin@messmate.com';
+        
+        console.log('📋 Loading admin profile for:', adminEmail);
+        
+        const response = await fetch(`/api/admin/profile/${adminEmail}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Admin profile loaded:', result);
+            
+            if (result.success && result.data) {
+                const profile = result.data;
+                
+                // Update profile form fields
+                const nameField = document.getElementById('admin-name');
+                const emailField = document.getElementById('admin-email');
+                const roleField = document.getElementById('admin-role');
+                
+                if (nameField) nameField.value = profile.name || 'Admin User';
+                if (emailField) emailField.value = profile.email || 'admin@messmate.com';
+                if (roleField) roleField.value = 'System Administrator';
+                
+                // Update sidebar info
+                const displayName = document.getElementById('admin-display-name');
+                const displayEmail = document.getElementById('admin-email');
+                
+                if (displayName) displayName.textContent = profile.name || 'System Administrator';
+                
+                console.log('🎯 Admin profile updated in UI');
+            }
+        } else {
+            console.warn('⚠️ Failed to load admin profile, using defaults');
+        }
+    } catch (error) {
+        console.error('❌ Error loading admin profile:', error);
+        // Use default values if API fails
+    }
+}
+
+// Function to test admin API connectivity
+async function testAdminAPI() {
+    try {
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+        const adminEmail = loggedInUser.email || 'admin@messmate.com';
+        
+        console.log('🧪 Testing admin API for:', adminEmail);
+        
+        const response = await fetch(`/api/admin/profile/${adminEmail}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Admin API test successful:', result);
+            showNotification('✅ Admin API is working correctly!', 'success');
+        } else {
+            console.error('❌ Admin API test failed:', response.status);
+            showNotification('❌ Admin API test failed: ' + response.status, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Admin API test error:', error);
+        showNotification('❌ Admin API error: ' + error.message, 'error');
+    }
+}
+
+// Function to debug admin user data
+async function debugAdminUser() {
+    try {
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+        const adminEmail = loggedInUser.email || 'admin@messmate.com';
+        
+        console.log('🔍 Debugging admin user:', adminEmail);
+        
+        const response = await fetch(`/api/admin/debug/${adminEmail}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('🔍 Admin debug info:', result);
+            
+            if (result.success) {
+                showNotification('✅ Debug info retrieved - check console', 'success');
+                console.table(result.data);
+            } else {
+                showNotification('❌ ' + result.message, 'error');
+            }
+        } else {
+            showNotification('❌ Debug request failed: ' + response.status, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Debug error:', error);
+        showNotification('❌ Debug error: ' + error.message, 'error');
+    }
+}
+
+// Function to verify password
+async function verifyAdminPassword() {
+    try {
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+        const adminEmail = loggedInUser.email || 'admin@messmate.com';
+        const testPassword = prompt('Enter password to verify (default: admin123):') || 'admin123';
+        
+        console.log('🔐 Verifying password for:', adminEmail);
+        
+        const response = await fetch('/api/admin/verify-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: adminEmail,
+                password: testPassword
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('🔐 Password verification result:', result);
+            
+            if (result.success && result.data.passwordMatches) {
+                showNotification('✅ Password is correct!', 'success');
+            } else {
+                showNotification('❌ Password is incorrect', 'error');
+            }
+        } else {
+            showNotification('❌ Verification request failed: ' + response.status, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Verification error:', error);
+        showNotification('❌ Verification error: ' + error.message, 'error');
+    }
+}
+
+// Function to ensure admin user exists
+async function ensureAdminExists() {
+    try {
+        console.log('🔧 Ensuring admin user exists...');
+        
+        const response = await fetch('/api/admin/ensure-admin-exists', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('🔧 Admin existence check result:', result);
+            
+            if (result.success) {
+                showNotification('✅ Admin user verified and ready!', 'success');
+                console.table(result.data);
+                
+                // Reload profile after ensuring admin exists
+                await loadAdminProfile();
+            } else {
+                showNotification('❌ ' + result.message, 'error');
+            }
+        } else {
+            showNotification('❌ Admin check failed: ' + response.status, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Admin existence check error:', error);
+        showNotification('❌ Error: ' + error.message, 'error');
+    }
+}
+
+// User management functions
+async function viewUser(userId) {
+    try {
+        console.log('👁️ Viewing user:', userId);
+        
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('👁️ User details:', result);
+            
+            if (result.success && result.data) {
+                const user = result.data;
+                alert(`User Details:\n\nName: ${user.name}\nEmail: ${user.email}\nType: ${user.userType}\nRoll/ID: ${user.rollNumber || 'N/A'}\nHostel: ${user.hostel || 'N/A'}\nRoom: ${user.room || 'N/A'}\nPhone: ${user.phone || 'N/A'}\nCreated: ${formatDate(user.createdAt)}`);
+            } else {
+                showNotification('❌ User not found', 'error');
+            }
+        } else {
+            showNotification('❌ Failed to load user details', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error viewing user:', error);
+        showNotification('❌ Error: ' + error.message, 'error');
+    }
+}
+
+async function editUser(userId) {
+    showNotification('✏️ Edit user functionality coming soon!', 'info');
+    console.log('✏️ Edit user:', userId);
+    // TODO: Implement edit user modal/form
+}
+
+// Function to test user API
+async function testUserAPI(filterType = '') {
+    try {
+        console.log('🧪 Testing User API...');
+        
+        // Test all users endpoint
+        console.log('📋 Testing /api/users/all');
+        const allResponse = await fetch('/api/users/all');
+        const allResult = await allResponse.json();
+        console.log('📋 All users result:', allResult);
+        
+        if (allResult.success && allResult.data) {
+            console.log('👥 Users in database:');
+            allResult.data.forEach((user, index) => {
+                console.log(`${index + 1}. ${user.name} (${user.email}) - Type: ${user.userType}`);
+            });
+        }
+        
+        // Test stats endpoint
+        console.log('📊 Testing /api/users/stats');
+        const statsResponse = await fetch('/api/users/stats');
+        const statsResult = await statsResponse.json();
+        console.log('📊 Stats result:', statsResult);
+        
+        // Test all filter types
+        const userTypes = ['STUDENT', 'STAFF', 'ADMIN'];
+        for (const type of userTypes) {
+            console.log(`🔍 Testing /api/users/by-type/${type}`);
+            try {
+                const filterResponse = await fetch(`/api/users/by-type/${type}`);
+                const filterResult = await filterResponse.json();
+                console.log(`🔍 ${type} filter result:`, filterResult);
+                if (filterResult.success && filterResult.data) {
+                    console.log(`   Found ${filterResult.data.length} ${type.toLowerCase()}(s)`);
+                }
+            } catch (err) {
+                console.error(`❌ Error testing ${type} filter:`, err);
+            }
+        }
+        
+        // Test specific filter if provided
+        if (filterType) {
+            console.log(`🎯 Specific test for ${filterType}`);
+            const filterResponse = await fetch(`/api/users/by-type/${filterType}`);
+            const filterResult = await filterResponse.json();
+            console.log(`🎯 Specific filter result for ${filterType}:`, filterResult);
+        }
+        
+        showNotification('✅ User API test completed - check console for details', 'success');
+        
+    } catch (error) {
+        console.error('❌ User API test failed:', error);
+        showNotification('❌ User API test failed: ' + error.message, 'error');
+    }
+}
+
+// Manual test functions for debugging
+async function testStudentFilter() {
+    console.log('🎓 Testing STUDENT filter manually...');
+    document.getElementById('user-type-filter').value = 'STUDENT';
+    await filterUsers();
+}
+
+async function testStaffFilter() {
+    console.log('👨‍💼 Testing STAFF filter manually...');
+    document.getElementById('user-type-filter').value = 'STAFF';
+    await filterUsers();
+}
+
+async function testAdminFilter() {
+    console.log('👑 Testing ADMIN filter manually...');
+    document.getElementById('user-type-filter').value = 'ADMIN';
+    await filterUsers();
+}
+
+// Make functions available globally
+window.loadAdminProfile = loadAdminProfile;
+window.testAdminAPI = testAdminAPI;
+window.debugAdminUser = debugAdminUser;
+window.verifyAdminPassword = verifyAdminPassword;
+window.ensureAdminExists = ensureAdminExists;
+window.viewUser = viewUser;
+window.editUser = editUser;
+window.loadUsers = loadUsers;
+window.loadUserStats = loadUserStats;
 
 function showNotification(message, type = 'info') {
     // Create notification element

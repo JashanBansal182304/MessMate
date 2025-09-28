@@ -1,12 +1,15 @@
 package com.example.MessMate.service;
 
+import com.example.MessMate.entity.Feedback;
 import com.example.MessMate.entity.MenuItem;
 import com.example.MessMate.entity.User;
+import com.example.MessMate.repository.FeedbackRepository;
 import com.example.MessMate.repository.MenuItemRepository;
 import com.example.MessMate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,11 +24,14 @@ public class DataInitializationService implements CommandLineRunner {
     
     private final MenuItemRepository menuItemRepository;
     private final UserRepository userRepository;
+    private final FeedbackRepository feedbackRepository;
+    private final PasswordEncoder passwordEncoder;
     
     @Override
     public void run(String... args) throws Exception {
         initializeUsers();
         initializeMenuItems();
+        initializeSampleFeedback();
     }
     
     private void initializeUsers() {
@@ -40,7 +46,7 @@ public class DataInitializationService implements CommandLineRunner {
                 User student = new User();
                 student.setName("Test Student");
                 student.setEmail("test@example.com");
-                student.setPassword("password123"); // In real app, this should be encrypted
+                student.setPassword(passwordEncoder.encode("password123")); // Properly encrypted
                 student.setRollNumber("STU001");
                 student.setPhone("9876543210");
                 student.setUserType(User.UserType.STUDENT);
@@ -51,19 +57,23 @@ public class DataInitializationService implements CommandLineRunner {
                 User staff = new User();
                 staff.setName("Test Staff");
                 staff.setEmail("staff@example.com");
-                staff.setPassword("password123"); // In real app, this should be encrypted
+                staff.setPassword(passwordEncoder.encode("password123")); // Properly encrypted
                 staff.setRollNumber("STF001");
                 staff.setPhone("9876543211");
                 staff.setUserType(User.UserType.STAFF);
+                staff.setHostel("Staff Quarter");
+                staff.setRoom("SQ01");
                 
                 // Create admin user
                 User admin = new User();
                 admin.setName("Admin User");
                 admin.setEmail("admin@example.com");
-                admin.setPassword("admin123");
+                admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRollNumber("ADM001");
                 admin.setPhone("9876543212");
                 admin.setUserType(User.UserType.ADMIN);
+                admin.setHostel("Admin Quarter");
+                admin.setRoom("AQ01");
                 
                 userRepository.saveAll(Arrays.asList(student, staff, admin));
                 
@@ -160,5 +170,71 @@ public class DataInitializationService implements CommandLineRunner {
         item.setIsAvailable(isAvailable);
         item.setIsVegetarian(isVegetarian);
         return item;
+    }
+    
+    private void initializeSampleFeedback() {
+        if (feedbackRepository.count() == 0) {
+            System.out.println("Creating sample feedback...");
+            try {
+                // Get sample users
+                User student = userRepository.findByEmail("test@example.com").orElse(null);
+                User staff = userRepository.findByEmail("staff@example.com").orElse(null);
+                
+                if (student != null) {
+                    List<Feedback> sampleFeedback = Arrays.asList(
+                        createFeedback(student, Feedback.FeedbackType.FOOD_QUALITY, 4, 
+                            "The food quality is generally good, but sometimes the vegetables are overcooked.", 
+                            Feedback.FeedbackStatus.PENDING),
+                        createFeedback(student, Feedback.FeedbackType.SERVICE, 5, 
+                            "Excellent service! The staff is very friendly and helpful.", 
+                            Feedback.FeedbackStatus.REVIEWED),
+                        createFeedback(student, Feedback.FeedbackType.CLEANLINESS, 3, 
+                            "The dining area could be cleaner. Tables are sometimes not properly cleaned.", 
+                            Feedback.FeedbackStatus.PENDING),
+                        createFeedback(student, Feedback.FeedbackType.GENERAL, 4, 
+                            "Overall experience is good. Would like more variety in breakfast options.", 
+                            Feedback.FeedbackStatus.RESOLVED),
+                        createFeedback(student, Feedback.FeedbackType.COMPLAINT, 2, 
+                            "The food was served cold yesterday during lunch time. Please ensure food is served hot.", 
+                            Feedback.FeedbackStatus.PENDING),
+                        createFeedback(student, Feedback.FeedbackType.SUGGESTION, 5, 
+                            "Please consider adding more South Indian dishes to the dinner menu.", 
+                            Feedback.FeedbackStatus.REVIEWED)
+                    );
+                    
+                    feedbackRepository.saveAll(sampleFeedback);
+                    
+                    // Add staff reply to one of the feedback
+                    if (staff != null) {
+                        Feedback reviewedFeedback = sampleFeedback.get(1); // Service feedback
+                        reviewedFeedback.setStaffReply("Thank you for your positive feedback! We're glad you're happy with our service.");
+                        reviewedFeedback.setRepliedBy(staff);
+                        reviewedFeedback.setRepliedAt(LocalDateTime.now().minusDays(1));
+                        feedbackRepository.save(reviewedFeedback);
+                    }
+                    
+                    System.out.println("Sample feedback created successfully! Count: " + feedbackRepository.count());
+                } else {
+                    System.out.println("No student user found, skipping feedback initialization");
+                }
+            } catch (Exception e) {
+                System.err.println("Error creating sample feedback: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Feedback already exists, skipping initialization. Count: " + feedbackRepository.count());
+        }
+    }
+    
+    private Feedback createFeedback(User student, Feedback.FeedbackType type, Integer rating, 
+                                   String message, Feedback.FeedbackStatus status) {
+        Feedback feedback = new Feedback();
+        feedback.setStudent(student);
+        feedback.setFeedbackType(type);
+        feedback.setRating(rating);
+        feedback.setMessage(message);
+        feedback.setStatus(status);
+        feedback.setCreatedAt(LocalDateTime.now().minusDays((long) (Math.random() * 7))); // Random date within last 7 days
+        return feedback;
     }
 }

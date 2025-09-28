@@ -2173,3 +2173,248 @@ body {
         gap: 1rem;
     }
 }
+
+/* Enhanced Feedback Styles for Staff Dashboard */
+.feedback-item {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #ff9a56;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #2d3748;
+}
+
+.feedback-item:hover {
+    box-shadow: 0 6px 20px rgba(255, 154, 86, 0.2);
+    transform: translateY(-3px);
+    border-left-color: #ff7043;
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.feedback-student {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.feedback-rating {
+    color: #ffd700;
+    font-size: 1.2rem;
+}
+
+.feedback-content {
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 12px 0;
+    font-style: italic;
+    background: #f7fafc;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.feedback-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #718096;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.feedback-type {
+    background: #e2e8f0;
+    color: #4a5568;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.feedback-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.feedback-status.pending {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.feedback-status.reviewed {
+    background: #bee3f8;
+    color: #2b6cb0;
+}
+
+.feedback-status.resolved {
+    background: #c6f6d5;
+    color: #2f855a;
+}
+
+.feedback-status.dismissed {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+/* Modal Styles for Feedback Details */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    color: #2d3748;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-content h3 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #ff9a56;
+}
+
+.feedback-detail {
+    line-height: 1.6;
+}
+
+.feedback-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+    padding: 16px;
+    background: #f7fafc;
+    border-radius: 8px;
+}
+
+.feedback-info span {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.feedback-message {
+    background: #e6fffa;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    border-left: 4px solid #38b2ac;
+}
+
+.staff-reply {
+    background: #fff5f5;
+    border-left: 4px solid #e53e3e;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.feedback-actions {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reply-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f7fafc;
+    border-radius: 8px;
+}
+
+.reply-section textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    margin-bottom: 12px;
+}
+
+.primary-btn {
+    background: #ff9a56;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+    background: #ff7043;
+    transform: translateY(-2px);
+}
+
+.loading-state, .error-state {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.error-state {
+    color: #e53e3e;
+    background: rgba(254, 215, 215, 0.9);
+}
