@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Staff Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow: auto;
+            border: 1px solid #dee2e6;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .create-staff {
+            background: #28a745;
+        }
+        .create-staff:hover {
+            background: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Staff Data Testing</h1>
+        
+        <div class="section">
+            <h3>Admin Data in localStorage</h3>
+            <button onclick="showAdminData()">Show Admin Data</button>
+            <button onclick="clearAdminData()">Clear Admin Data</button>
+            <pre id="admin-data">Click "Show Admin Data" to view current data</pre>
+        </div>
+        
+        <div class="section">
+            <h3>Test Staff Creation</h3>
+            <button class="create-staff" onclick="createTestStaff()">Create Test Staff</button>
+            <pre id="test-result">Click "Create Test Staff" to create a sample staff member</pre>
+        </div>
+        
+        <div class="section">
+            <h3>Test Staff Login</h3>
+            <input type="text" id="test-email" placeholder="Staff Email or ID" style="padding: 8px; margin: 5px;">
+            <input type="password" id="test-password" placeholder="Staff Password" style="padding: 8px; margin: 5px;">
+            <button onclick="testStaffLogin()">Test Login</button>
+            <pre id="login-result">Enter credentials and click "Test Login"</pre>
+        </div>
+    </div>
+
+    <script>
+        function showAdminData() {
+            const adminData = JSON.parse(localStorage.getItem('messmate_admin_data')) || {};
+            document.getElementById('admin-data').textContent = JSON.stringify(adminData, null, 2);
+        }
+        
+        function clearAdminData() {
+            localStorage.removeItem('messmate_admin_data');
+            document.getElementById('admin-data').textContent = 'Admin data cleared';
+        }
+        
+        function createTestStaff() {
+            const adminData = JSON.parse(localStorage.getItem('messmate_admin_data')) || {};
+            if (!adminData.staff) {
+                adminData.staff = [];
+            }
+            
+            const testStaff = {
+                id: Date.now(),
+                staffId: 'STF25001',
+                name: 'Test Staff Member',
+                email: 'test.staff@mess.com',
+                phone: '+1234567890',
+                shift: 'morning',
+                password: 'TestPass123',
+                status: 'active',
+                role: 'Kitchen Staff',
+                userType: 'STAFF',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            adminData.staff.push(testStaff);
+            adminData.lastUpdated = new Date().toISOString();
+            localStorage.setItem('messmate_admin_data', JSON.stringify(adminData));
+            
+            document.getElementById('test-result').textContent = 'Test staff created successfully!\n\nCredentials:\nEmail/ID: test.staff@mess.com or STF25001\nPassword: TestPass123\n\n' + JSON.stringify(testStaff, null, 2);
+        }
+        
+        function testStaffLogin() {
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            
+            if (!email || !password) {
+                document.getElementById('login-result').textContent = 'Please enter both email/ID and password';
+                return;
+            }
+            
+            // Use the same function as login.js
+            const result = checkStaffCredentials(email, password);
+            document.getElementById('login-result').textContent = JSON.stringify(result, null, 2);
+        }
+        
+        // Copy the checkStaffCredentials function from login.js
+        function checkStaffCredentials(email, password) {
+            try {
+                console.log('Checking staff credentials for:', email);
+                const adminData = JSON.parse(localStorage.getItem('messmate_admin_data')) || {};
+                const staffMembers = adminData.staff || [];
+                
+                console.log('Available staff members:', staffMembers);
+                
+                // Find staff by email or staffId
+                const staff = staffMembers.find(s => 
+                    (s.email === email || s.staffId === email) && 
+                    s.password === password && 
+                    s.status === 'active'
+                );
+                
+                console.log('Found staff:', staff);
+                
+                if (staff) {
+                    return {
+                        success: true,
+                        staff: {
+                            id: staff.id,
+                            staffId: staff.staffId,
+                            name: staff.name,
+                            email: staff.email,
+                            phone: staff.phone,
+                            shift: staff.shift,
+                            role: staff.role,
+                            userType: 'STAFF',
+                            status: staff.status
+                        }
+                    };
+                }
+                
+                return { success: false, message: 'Invalid credentials or inactive account' };
+            } catch (error) {
+                console.error('Error checking staff credentials:', error);
+                return { success: false, message: 'Error checking credentials' };
+            }
+        }
+        
+        // Auto-load admin data on page load
+        window.onload = function() {
+            showAdminData();
+        }
+    </script>
+</body>
+</html>

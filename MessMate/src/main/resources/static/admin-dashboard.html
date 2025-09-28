@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - MessMate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Admin Info Section -->
+            <div class="student-info">
+                <div class="avatar">
+                    <span id="admin-avatar">👨‍💼</span>
+                </div>
+                <div class="student-details">
+                    <h3 id="admin-display-name">System Administrator</h3>
+                    <p id="admin-role">Admin</p>
+                    <p id="admin-email">admin@messmate.com</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-menu">
+                <ul>
+                    <li class="nav-item active" data-section="overview">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Overview</span>
+                    </li>
+                    <li class="nav-item" data-section="menu-management">
+                        <span class="nav-icon">🍽️</span>
+                        <span class="nav-text">Daily Menu</span>
+                    </li>
+                    <li class="nav-item" data-section="user-management">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">User Management</span>
+                    </li>
+                    <li class="nav-item" data-section="student-orders">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">Student Orders</span>
+                    </li>
+                    <li class="nav-item" data-section="complaint-management">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">Complaints</span>
+                    </li>
+                    <li class="nav-item" data-section="feedback-management">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Feedback</span>
+                    </li>
+                    <li class="nav-item" data-section="staff-management">
+                        <span class="nav-icon">👨‍🍳</span>
+                        <span class="nav-text">Staff Management</span>
+                    </li>
+                    <li class="nav-item" data-section="student-details">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Student Details</span>
+                    </li>
+                    <li class="nav-item" data-section="settings">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </li>
+                    <li class="nav-item" data-section="reports">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Reports</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="logout-section">
+                <button id="logout-btn" class="logout-btn" onclick="logout()">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1 id="section-title">Admin Dashboard Overview</h1>
+                <div class="header-actions">
+                    <span class="welcome-text">Welcome Admin! 👋</span>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <div class="content-wrapper">
+            <!-- Content Sections -->
+            <div class="content-wrapper">
+                <!-- Overview Section -->
+                <section id="overview-section" class="content-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <h3>Total Users</h3>
+                                <p id="total-users">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📝</div>
+                            <div class="stat-info">
+                                <h3>Pending Complaints</h3>
+                                <p id="pending-complaints">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🍽️</div>
+                            <div class="stat-info">
+                                <h3>Today's Bookings</h3>
+                                <p id="todays-bookings">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-info">
+                                <h3>Average Rating</h3>
+                                <p id="avg-rating">4.5</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" data-section="menu-management">
+                                <span>🍽️</span>
+                                Add Today's Menu
+                            </button>
+                            <button class="action-btn" data-section="complaint-management">
+                                <span>📝</span>
+                                Review Complaints
+                            </button>
+                            <button class="action-btn" data-section="user-management">
+                                <span>👥</span>
+                                Manage Users
+                            </button>
+                            <button class="action-btn" data-section="reports">
+                                <span>📈</span>
+                                Generate Reports
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Data Management Controls -->
+                    <div class="simulation-controls">
+                        <h3>Data Management</h3>
+                        <div class="test-buttons">
+                            <button class="btn btn-primary" onclick="updateStats()">
+                                <span>🔄</span>
+                                Refresh Stats
+                            </button>
+                            <button class="btn btn-info" onclick="loadDataFromStorage(); loadUsers(); updateStats();">
+                                <span>💾</span>
+                                Reload Data
+                            </button>
+                            <button class="btn btn-secondary" onclick="console.log('localStorage data:', localStorage.getItem('messmate_admin_data'));">
+                                <span>🔍</span>
+                                Debug Data
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Menu Management Section -->
+                <section id="menu-management-section" class="content-section">
+                    <div class="menu-management-container">
+                    <div class="add-menu-form">
+                        <h3>Add Today's Menu</h3>
+                        <form id="menu-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="menu-date">Date:</label>
+                                    <input type="date" id="menu-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="meal-type">Meal Type:</label>
+                                    <select id="meal-type" required>
+                                        <option value="">Select Meal</option>
+                                        <option value="breakfast">Breakfast</option>
+                                        <option value="lunch">Lunch</option>
+                                        <option value="dinner">Dinner</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="menu-items">Menu Items:</label>
+                                <textarea id="menu-items" placeholder="Enter menu items (one per line)" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="menu-price">Price per Meal:</label>
+                                <input type="number" id="menu-price" step="0.01" placeholder="0.00" required>
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">Add Menu</button>
+                        </form>
+                    </div>
+
+                    <div class="current-menus">
+                        <h3>Current Week's Menus</h3>
+                        <div id="menu-list" class="menu-cards">
+                            <!-- Menu cards will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                </section>
+
+                <!-- User Management Section -->
+                <section id="user-management-section" class="content-section">
+                    <div class="user-management-container">
+                    <div class="user-stats">
+                        <div class="user-stat">
+                            <span class="stat-number" id="student-count">0</span>
+                            <span class="stat-label">Students</span>
+                        </div>
+                        <div class="user-stat">
+                            <span class="stat-number" id="staff-count">0</span>
+                            <span class="stat-label">Staff</span>
+                        </div>
+                        <div class="user-stat">
+                            <span class="stat-number" id="admin-count">0</span>
+                            <span class="stat-label">Admins</span>
+                        </div>
+                    </div>
+
+                    <div class="user-table-container">
+                        <div class="table-header">
+                            <h3>Registered Users</h3>
+                            <div class="filter-controls">
+                                <select id="user-type-filter">
+                                    <option value="">All Users</option>
+                                    <option value="STUDENT">Students</option>
+                                    <option value="STAFF">Staff</option>
+                                    <option value="ADMIN">Admins</option>
+                                </select>
+                                <input type="text" id="user-search" placeholder="Search users...">
+                            </div>
+                        </div>
+                        
+                        <div class="user-table">
+                            <table id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>User Type</th>
+                                        <th>Roll/ID</th>
+                                        <th>Hostel</th>
+                                        <th>Room</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <!-- User data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                </section>
+
+                <!-- Student Orders Section -->
+                <section id="student-orders-section" class="content-section">
+                    <div class="student-orders-container">
+                        <div class="section-header">
+                            <h3>Student Meal Bookings</h3>
+                        </div>
+
+                        <!-- Booking Summary Cards -->
+                        <div class="booking-summary">
+                            <div class="booking-card breakfast">
+                                <div class="booking-card-header">
+                                    <div class="booking-card-icon">🥞</div>
+                                    <div>
+                                        <h3 class="booking-card-title">Breakfast</h3>
+                                        <p class="booking-card-subtitle">Morning Meals</p>
+                                    </div>
+                                </div>
+                                <div class="booking-card-stats">
+                                    <div class="booking-stat">
+                                        <span class="booking-stat-value">0</span>
+                                        <span class="booking-stat-label">Total Quantity</span>
+                                    </div>
+                                    <div class="booking-stat">
+                                        <span class="booking-stat-value">0</span>
+                                        <span class="booking-stat-label">Bookings</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-card lunch">
+                                <div class="booking-card-header">
+                                    <div class="booking-card-icon">🍽️</div>
+                                    <div>
+                                        <h3 class="booking-card-title">Lunch</h3>
+                                        <p class="booking-card-subtitle">Afternoon Meals</p>
+                                    </div>
+                                </div>
+                                <div class="booking-card-stats">
+                                    <div class="booking-stat">
+                                        <span class="booking-stat-value">0</span>
+                                        <span class="booking-stat-label">Total Quantity</span>
+                                    </div>
+                                    <div class="booking-stat">
+                                        <span class="booking-stat-value">0</span>
+                                        <span class="booking-stat-label">Bookings</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-card dinner">
+                                <div class="booking-card-header">
+                                    <div class="booking-card-icon">🍛</div>
+                                    <div>
+                                        <h3 class="booking-card-title">Dinner</h3>
+                                        <p class="booking-card-subtitle">Evening Meals</p>
+                                    </div>
+                                </div>
+                                <div class="booking-card-stats">
+                                    <div class="booking-stat">
+                                        <span class="booking-stat-value">0</span>
+                                        <span class="booking-stat-label">Total Quantity</span>
+                                    </div>
+                                    <div class="booking-stat">
+                                        <span class="booking-stat-value">0</span>
+                                        <span class="booking-stat-label">Bookings</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Booking Controls -->
+                        <div class="booking-controls">
+                            <div class="booking-controls-header">
+                                <h3>Filter & Actions</h3>
+                                <div class="booking-controls-actions">
+                                    <input type="date" id="booking-date-selector" class="date-selector" value="">
+                                    <div class="quick-actions">
+                                        <button class="quick-btn export" onclick="exportBookingStats()">Export</button>
+                                        <button class="quick-btn refresh" onclick="refreshBookingStats()">Refresh</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Booking Statistics Table -->
+                        <!-- Booking Statistics Table -->
+                        <div class="booking-stats-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Meal Type</th>
+                                        <th>Total Quantity</th>
+                                        <th>Number of Bookings</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="booking-stats-table-body">
+                                    <tr>
+                                        <td colspan="4">Loading booking data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>                        <!-- Quick Actions -->
+                        <div class="quick-actions">
+                            <button onclick="exportBookingStats()" class="action-btn export">📊 Export Stats</button>
+                            <button onclick="refreshBookingStats()" class="action-btn refresh">🔄 Refresh</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Complaint Management Section -->
+                <section id="complaint-management-section" class="content-section">
+                    <div class="complaint-management-container">
+                    <div class="complaint-stats">
+                        <div class="complaint-stat pending">
+                            <span class="stat-number" id="pending-count">0</span>
+                            <span class="stat-label">Pending</span>
+                        </div>
+                        <div class="complaint-stat in-progress">
+                            <span class="stat-number" id="inprogress-count">0</span>
+                            <span class="stat-label">In Progress</span>
+                        </div>
+                        <div class="complaint-stat solved">
+                            <span class="stat-number" id="solved-count">0</span>
+                            <span class="stat-label">Solved</span>
+                        </div>
+                    </div>
+
+                    <div class="complaint-filters">
+                        <select id="complaint-status-filter">
+                            <option value="">All Complaints</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="solved">Solved</option>
+                        </select>
+                        <select id="complaint-priority-filter">
+                            <option value="">All Priorities</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <div id="complaints-list" class="complaints-container">
+                        <!-- Complaint cards will be populated here -->
+                    </div>
+                </div>
+                </section>
+
+                <!-- Feedback Management Section -->
+                <section id="feedback-management-section" class="content-section">
+                    <div class="feedback-management-container">
+                    <div class="feedback-stats">
+                        <div class="feedback-stat">
+                            <span class="stat-number" id="total-feedback">0</span>
+                            <span class="stat-label">Total Feedback</span>
+                        </div>
+                        <div class="feedback-stat">
+                            <span class="stat-number" id="avg-food-rating">0</span>
+                            <span class="stat-label">Avg Food Rating</span>
+                        </div>
+                        <div class="feedback-stat">
+                            <span class="stat-number" id="avg-service-rating">0</span>
+                            <span class="stat-label">Avg Service Rating</span>
+                        </div>
+                    </div>
+
+                    <div class="feedback-filters">
+                        <select id="feedback-rating-filter">
+                            <option value="">All Ratings</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                        <input type="date" id="feedback-date-filter">
+                    </div>
+
+                    <div id="feedback-list" class="feedback-container">
+                        <!-- Feedback cards will be populated here -->
+                    </div>
+                </div>
+                </section>
+
+                <!-- Staff Management Section -->
+                <section id="staff-management-section" class="content-section">
+                    <div class="staff-management-container">
+                        <div class="staff-header">
+                            <h3>Staff Management</h3>
+                            <button onclick="openAddStaffModal()" class="add-staff-btn">+ Add New Staff</button>
+                        </div>
+
+                        <div class="staff-stats">
+                            <div class="staff-stat">
+                                <span class="stat-number" id="total-staff">0</span>
+                                <span class="stat-label">Total Staff</span>
+                            </div>
+                            <div class="staff-stat">
+                                <span class="stat-number" id="active-staff">0</span>
+                                <span class="stat-label">Active Staff</span>
+                            </div>
+                            <div class="staff-stat">
+                                <span class="stat-number" id="morning-shift">0</span>
+                                <span class="stat-label">Morning Shift</span>
+                            </div>
+                            <div class="staff-stat">
+                                <span class="stat-number" id="evening-shift">0</span>
+                                <span class="stat-label">Evening Shift</span>
+                            </div>
+                        </div>
+
+                        <div class="staff-filters">
+                            <select id="staff-status-filter">
+                                <option value="">All Staff</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <select id="staff-shift-filter">
+                                <option value="">All Shifts</option>
+                                <option value="morning">Morning</option>
+                                <option value="evening">Evening</option>
+                                <option value="full">Full Day</option>
+                            </select>
+                            <input type="text" id="staff-search" placeholder="Search staff by name or ID...">
+                        </div>
+
+                        <div id="staff-list" class="staff-container">
+                            <!-- Staff cards will be populated here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Student Details Section -->
+                <section id="student-details-section" class="content-section">
+                    <div class="student-details-container">
+                    <div class="student-search">
+                        <input type="text" id="student-search" placeholder="Search by name, roll number, or email...">
+                        <button onclick="searchStudents()" class="search-btn">Search</button>
+                    </div>
+
+                    <div id="student-details-list" class="student-cards-container">
+                        <!-- Student detail cards will be populated here -->
+                    </div>
+                </div>
+                </section>
+
+                <!-- Reports Section -->
+                <section id="reports-section" class="content-section">
+                    <div class="reports-container">
+                    <div class="report-cards">
+                        <div class="report-card">
+                            <h3>Daily Meal Reports</h3>
+                            <p>Generate reports for daily meal bookings and consumption</p>
+                            <button onclick="generateDailyReport()" class="report-btn">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <h3>User Registration Report</h3>
+                            <p>View user registration trends and statistics</p>
+                            <button onclick="generateUserReport()" class="report-btn">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <h3>Feedback Analysis</h3>
+                            <p>Analyze student feedback and ratings over time</p>
+                            <button onclick="generateFeedbackReport()" class="report-btn">Generate Report</button>
+                        </div>
+                        <div class="report-card">
+                            <h3>Complaint Summary</h3>
+                            <p>Summary of complaints and resolution statistics</p>
+                            <button onclick="generateComplaintReport()" class="report-btn">Generate Report</button>
+                        </div>
+                    </div>
+                </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings-section" class="content-section">
+                    <div class="settings-container">
+                        <h3>Admin Settings</h3>
+                        
+                        <!-- Admin Profile Settings -->
+                        <div class="settings-card">
+                            <h4>Profile Information</h4>
+                            <form id="admin-profile-form" class="form-container">
+                                <div class="form-group">
+                                    <label for="admin-name">Full Name</label>
+                                    <input type="text" id="admin-name" value="Admin User" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-email">Email</label>
+                                    <input type="email" id="admin-email" value="admin@messmate.com" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-role">Role</label>
+                                    <input type="text" id="admin-role" value="System Administrator" readonly>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Change Password -->
+                        <div class="settings-card" style="margin-top: 30px;">
+                            <h4>Change Password</h4>
+                            <form id="admin-change-password-form" class="form-container">
+                                <div class="form-group">
+                                    <label for="admin-current-password">Current Password</label>
+                                    <input type="password" id="admin-current-password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-new-password">New Password</label>
+                                    <input type="password" id="admin-new-password" required minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-confirm-password">Confirm New Password</label>
+                                    <input type="password" id="admin-confirm-password" required minlength="6">
+                                </div>
+                                <button type="submit" class="primary-btn">Change Password</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Management Modal -->
+    <div id="staff-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="staff-modal-title">Add New Staff</h3>
+                <span class="close" onclick="closeStaffModal()">&times;</span>
+            </div>
+            <form id="staff-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="staff-name">Full Name *</label>
+                        <input type="text" id="staff-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="staff-email">Email *</label>
+                        <input type="email" id="staff-email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="staff-phone">Phone Number</label>
+                        <input type="tel" id="staff-phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="staff-shift">Shift *</label>
+                        <select id="staff-shift" required>
+                            <option value="morning">Morning (6 AM - 2 PM)</option>
+                            <option value="evening">Evening (2 PM - 10 PM)</option>
+                            <option value="full">Full Day (6 AM - 10 PM)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="staff-id">Staff ID</label>
+                        <input type="text" id="staff-id" readonly placeholder="Auto-generated">
+                    </div>
+                    <div class="form-group">
+                        <label for="staff-password">Default Password *</label>
+                        <input type="text" id="staff-password" required>
+                        <button type="button" onclick="generateStaffPassword()" class="generate-btn">Generate</button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="staff-status">Status</label>
+                        <select id="staff-status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="staff-role">Role</label>
+                        <input type="text" id="staff-role" value="Kitchen Staff" placeholder="Kitchen Staff, Supervisor, etc.">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeStaffModal()" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="submit-btn">Save Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin-dashboard.js"></script>
+</body>
+</html>

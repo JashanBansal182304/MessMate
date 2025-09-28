@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - Mess Mate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/staff-dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Staff Info Section -->
+            <div class="staff-info">
+                <div class="avatar">
+                    <span id="staff-avatar">👤</span>
+                </div>
+                <div class="staff-details">
+                    <h3 id="staff-name">Loading...</h3>
+                    <p id="staff-role">Staff Member</p>
+                    <p id="staff-shift">Shift: Loading...</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-menu">
+                <ul>
+                    <li class="nav-item active" data-section="overview">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Overview</span>
+                    </li>
+                    <li class="nav-item" data-section="daily-menu">
+                        <span class="nav-icon">🍽️</span>
+                        <span class="nav-text">Daily Menu</span>
+                    </li>
+                    <li class="nav-item" data-section="meal-distribution">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">Meal Distribution</span>
+                    </li>
+                    <li class="nav-item" data-section="student-orders">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">Student Orders</span>
+                    </li>
+                    <li class="nav-item" data-section="inventory">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Inventory</span>
+                    </li>
+                    <li class="nav-item" data-section="feedback">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Feedback</span>
+                    </li>
+                    <li class="nav-item" data-section="profile">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Profile</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="logout-container">
+                <button onclick="logout()" class="logout-btn">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="content-header">
+                <h1 id="section-title">Staff Dashboard Overview</h1>
+                <div class="header-actions">
+                    <span class="date-time" id="current-datetime"></span>
+                    <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <section id="overview-section" class="content-section active">
+                <div class="overview-container">
+                    <!-- Quick Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🍽️</div>
+                            <div class="stat-content">
+                                <h3 id="todays-meals">0</h3>
+                                <p>Menu Items Today</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <h3 id="meals-served">0</h3>
+                                <p>Meals Booked</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">�</div>
+                            <div class="stat-content">
+                                <h3 id="low-stock-items">0</h3>
+                                <p>Students Served</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">�</div>
+                            <div class="stat-content">
+                                <h3 id="pending-feedback">0</h3>
+                                <p>Revenue (₹)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" data-section="daily-menu">
+                                <span>🍽️</span> Update Menu Status
+                            </button>
+                            <button class="action-btn" data-section="meal-distribution">
+                                <span>📋</span> Mark Meals Served
+                            </button>
+                            <button class="action-btn" data-section="inventory">
+                                <span>📦</span> Update Inventory
+                            </button>
+                            <button class="action-btn" data-section="feedback">
+                                <span>💬</span> Review Feedback
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Today's Schedule -->
+                    <div class="schedule-container">
+                        <h3>Today's Schedule</h3>
+                        <div class="schedule-list" id="todays-schedule">
+                            <div class="schedule-item">
+                                <span class="schedule-time">07:00 - 09:00</span>
+                                <span class="schedule-meal">Breakfast</span>
+                                <span class="schedule-status ready">Ready</span>
+                            </div>
+                            <div class="schedule-item">
+                                <span class="schedule-time">12:00 - 14:00</span>
+                                <span class="schedule-meal">Lunch</span>
+                                <span class="schedule-status preparing">Preparing</span>
+                            </div>
+                            <div class="schedule-item">
+                                <span class="schedule-time">19:00 - 21:00</span>
+                                <span class="schedule-meal">Dinner</span>
+                                <span class="schedule-status pending">Pending</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Daily Menu Section -->
+            <section id="daily-menu-section" class="content-section">
+                <div class="daily-menu-container">
+                    <div class="section-header">
+                        <h3>Daily Menu Management</h3>
+                        <p class="section-description">View daily menus created by admin. Select a date to see the menu for that day.</p>
+                        <div class="date-selector">
+                            <input type="date" id="menu-date" value="">
+                            <button onclick="loadMenuForDate()" class="load-btn">Load Menu</button>
+                        </div>
+                    </div>
+
+                    <div class="menu-list" id="daily-menu-list">
+                        <!-- Menu items will be loaded here -->
+                    </div>
+
+                    <!-- Add New Menu Item -->
+                    <div class="add-menu-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 154, 86, 0.1);">
+                        <h4>Staff Note: Add Menu Items</h4>
+                        <p style="color: #b0bec5; font-size: 0.9rem; margin-bottom: 1rem;">This section allows staff to add individual menu items. Daily menus are primarily managed by admin.</p>
+                        <form id="add-menu-form" class="menu-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="menu-meal-type">Meal Type</label>
+                                    <select id="menu-meal-type" required>
+                                        <option value="">Select Meal</option>
+                                        <option value="breakfast">Breakfast</option>
+                                        <option value="lunch">Lunch</option>
+                                        <option value="dinner">Dinner</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="menu-item-name">Item Name</label>
+                                    <input type="text" id="menu-item-name" placeholder="e.g., Rice, Dal, Curry" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="menu-status">Status</label>
+                                    <select id="menu-status" required>
+                                        <option value="ready">Ready</option>
+                                        <option value="preparing">Preparing</option>
+                                        <option value="delayed">Delayed</option>
+                                        <option value="finished">Finished</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="primary-btn">Add Menu Item</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Meal Distribution Section -->
+            <section id="meal-distribution-section" class="content-section">
+                <div class="distribution-container">
+                    <div class="section-header">
+                        <h3>Meal Distribution Tracking</h3>
+                        <div class="distribution-stats">
+                            <span>Total Served: <strong id="total-served-today">0</strong></span>
+                            <span>Remaining: <strong id="remaining-meals">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="distribution-scanner">
+                        <h4>Mark Meal as Served</h4>
+                        <div class="scanner-input">
+                            <input type="text" id="student-id-input" placeholder="Enter Student ID or Roll Number" autofocus>
+                            <button onclick="markMealServed()" class="scan-btn">Mark Served</button>
+                        </div>
+                    </div>
+
+                    <div class="recent-distributions">
+                        <h4>Recent Distributions</h4>
+                        <div class="distribution-list" id="recent-distributions">
+                            <!-- Recent meal distributions will be shown here -->
+                        </div>
+                    </div>
+
+                    <div class="meal-summary">
+                        <h4>Today's Summary by Meal</h4>
+                        <div class="summary-grid" id="meal-summary-grid">
+                            <!-- Meal summary will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student Orders Section -->
+            <section id="student-orders-section" class="content-section">
+                <div class="orders-container">
+                    <div class="section-header">
+                        <div class="header-content">
+                            <h3>📝 Student Meal Bookings</h3>
+                            <p class="section-description">Manage and track student meal bookings by date</p>
+                        </div>
+                        <div class="header-controls">
+                            <div class="date-selector">
+                                <label for="orders-date">📅 Select Date:</label>
+                                <input type="date" id="orders-date" value="">
+                                <button onclick="loadStudentOrders()" class="load-btn">
+                                    <span class="btn-icon">🔍</span>
+                                    Load Bookings
+                                </button>
+                            </div>
+                            <div class="view-controls">
+                                <button onclick="toggleView('summary')" class="view-btn active" id="summary-view-btn">
+                                    <span class="btn-icon">📊</span>
+                                    Summary
+                                </button>
+                                <button onclick="toggleView('detailed')" class="view-btn" id="detailed-view-btn">
+                                    <span class="btn-icon">📋</span>
+                                    Detailed
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats Overview -->
+                    <div class="quick-stats" id="quick-stats">
+                        <div class="stat-card total">
+                            <div class="stat-icon">🍽️</div>
+                            <div class="stat-content">
+                                <h4>Total Bookings</h4>
+                                <span class="stat-number" id="total-orders-count">0</span>
+                                <small class="stat-label">meals booked</small>
+                            </div>
+                        </div>
+                        <div class="stat-card breakfast">
+                            <div class="stat-icon">🌅</div>
+                            <div class="stat-content">
+                                <h4>Breakfast</h4>
+                                <span class="stat-number" id="breakfast-orders-count">0</span>
+                                <small class="stat-label">bookings</small>
+                            </div>
+                        </div>
+                        <div class="stat-card lunch">
+                            <div class="stat-icon">☀️</div>
+                            <div class="stat-content">
+                                <h4>Lunch</h4>
+                                <span class="stat-number" id="lunch-orders-count">0</span>
+                                <small class="stat-label">bookings</small>
+                            </div>
+                        </div>
+                        <div class="stat-card dinner">
+                            <div class="stat-icon">🌙</div>
+                            <div class="stat-content">
+                                <h4>Dinner</h4>
+                                <span class="stat-number" id="dinner-orders-count">0</span>
+                                <small class="stat-label">bookings</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Meal Type Filter -->
+                    <div class="meal-filter">
+                        <div class="filter-buttons">
+                            <button onclick="filterMealType('all')" class="filter-btn active" data-meal="all">
+                                <span class="filter-icon">🍽️</span>
+                                All Meals
+                            </button>
+                            <button onclick="filterMealType('BREAKFAST')" class="filter-btn" data-meal="BREAKFAST">
+                                <span class="filter-icon">🌅</span>
+                                Breakfast
+                            </button>
+                            <button onclick="filterMealType('LUNCH')" class="filter-btn" data-meal="LUNCH">
+                                <span class="filter-icon">☀️</span>
+                                Lunch
+                            </button>
+                            <button onclick="filterMealType('DINNER')" class="filter-btn" data-meal="DINNER">
+                                <span class="filter-icon">🌙</span>
+                                Dinner
+                            </button>
+                        </div>
+                        <div class="bulk-actions">
+                            <button onclick="exportAllBookings()" class="action-btn export">
+                                <span class="btn-icon">📄</span>
+                                Export All
+                            </button>
+                            <button onclick="notifyAllStudents()" class="action-btn notify">
+                                <span class="btn-icon">📧</span>
+                                Notify All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Orders Display Area -->
+                    <div class="orders-display" id="orders-display">
+                        <div class="orders-by-meal" id="orders-by-meal">
+                            <div class="meal-booking-section" id="breakfast-section">
+                                <div class="meal-header">
+                                    <h4 class="meal-title">
+                                        <span class="meal-icon">🌅</span>
+                                        Breakfast Bookings
+                                    </h4>
+                                    <div class="meal-actions">
+                                        <button onclick="exportMealBookings(getCurrentDate(), 'BREAKFAST')" class="mini-btn export">
+                                            📄 Export
+                                        </button>
+                                        <button onclick="notifyStudents(getCurrentDate(), 'BREAKFAST')" class="mini-btn notify">
+                                            📧 Notify
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="orders-list" id="breakfast-orders-list">
+                                    <!-- Breakfast orders will be loaded here -->
+                                </div>
+                            </div>
+
+                            <div class="meal-booking-section" id="lunch-section">
+                                <div class="meal-header">
+                                    <h4 class="meal-title">
+                                        <span class="meal-icon">☀️</span>
+                                        Lunch Bookings
+                                    </h4>
+                                    <div class="meal-actions">
+                                        <button onclick="exportMealBookings(getCurrentDate(), 'LUNCH')" class="mini-btn export">
+                                            📄 Export
+                                        </button>
+                                        <button onclick="notifyStudents(getCurrentDate(), 'LUNCH')" class="mini-btn notify">
+                                            📧 Notify
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="orders-list" id="lunch-orders-list">
+                                    <!-- Lunch orders will be loaded here -->
+                                </div>
+                            </div>
+
+                            <div class="meal-booking-section" id="dinner-section">
+                                <div class="meal-header">
+                                    <h4 class="meal-title">
+                                        <span class="meal-icon">🌙</span>
+                                        Dinner Bookings
+                                    </h4>
+                                    <div class="meal-actions">
+                                        <button onclick="exportMealBookings(getCurrentDate(), 'DINNER')" class="mini-btn export">
+                                            📄 Export
+                                        </button>
+                                        <button onclick="notifyStudents(getCurrentDate(), 'DINNER')" class="mini-btn notify">
+                                            📧 Notify
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="orders-list" id="dinner-orders-list">
+                                    <!-- Dinner orders will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div class="loading-state" id="loading-state" style="display: none;">
+                            <div class="loading-spinner"></div>
+                            <p>Loading booking data...</p>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="empty-state" id="empty-state" style="display: none;">
+                            <div class="empty-icon">📝</div>
+                            <h3>No Bookings Found</h3>
+                            <p>No meal bookings found for the selected date.</p>
+                            <button onclick="loadStudentOrders()" class="refresh-btn">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inventory Section -->
+            <section id="inventory-section" class="content-section">
+                <div class="inventory-container">
+                    <div class="section-header">
+                        <h3>Inventory Management</h3>
+                        <button onclick="addNewItem()" class="add-item-btn">+ Add New Item</button>
+                    </div>
+
+                    <!-- Low Stock Alerts -->
+                    <div class="alert-section" id="low-stock-alerts">
+                        <!-- Low stock alerts will be shown here -->
+                    </div>
+
+                    <!-- Inventory Categories -->
+                    <div class="inventory-categories">
+                        <button class="category-btn active" data-category="all">All Items</button>
+                        <button class="category-btn" data-category="grains">Grains & Cereals</button>
+                        <button class="category-btn" data-category="vegetables">Vegetables</button>
+                        <button class="category-btn" data-category="spices">Spices</button>
+                        <button class="category-btn" data-category="dairy">Dairy</button>
+                        <button class="category-btn" data-category="others">Others</button>
+                    </div>
+
+                    <!-- Inventory List -->
+                    <div class="inventory-list" id="inventory-list">
+                        <!-- Inventory items will be loaded here -->
+                    </div>
+
+                    <!-- Add/Edit Item Modal -->
+                    <div id="item-modal" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeModal()">&times;</span>
+                            <h3 id="modal-title">Add New Item</h3>
+                            <form id="item-form">
+                                <div class="form-group">
+                                    <label for="item-name">Item Name</label>
+                                    <input type="text" id="item-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="item-category">Category</label>
+                                    <select id="item-category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="grains">Grains & Cereals</option>
+                                        <option value="vegetables">Vegetables</option>
+                                        <option value="spices">Spices</option>
+                                        <option value="dairy">Dairy</option>
+                                        <option value="others">Others</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="item-quantity">Current Stock</label>
+                                        <input type="number" id="item-quantity" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="item-unit">Unit</label>
+                                        <select id="item-unit" required>
+                                            <option value="kg">Kg</option>
+                                            <option value="grams">Grams</option>
+                                            <option value="liters">Liters</option>
+                                            <option value="pieces">Pieces</option>
+                                            <option value="packets">Packets</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="item-min-stock">Minimum Stock Level</label>
+                                    <input type="number" id="item-min-stock" required>
+                                </div>
+                                <div class="modal-actions">
+                                    <button type="button" onclick="closeModal()" class="cancel-btn">Cancel</button>
+                                    <button type="submit" class="primary-btn">Save Item</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feedback Section -->
+            <section id="feedback-section" class="content-section">
+                <div class="feedback-container">
+                    <div class="section-header">
+                        <h3>Student Feedback Management</h3>
+                        <div class="feedback-filters">
+                            <select id="feedback-filter-rating">
+                                <option value="">All Ratings</option>
+                                <option value="1">1 Star</option>
+                                <option value="2">2 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="5">5 Stars</option>
+                            </select>
+                            <select id="feedback-filter-status">
+                                <option value="">All Status</option>
+                                <option value="unread">Unread</option>
+                                <option value="read">Read</option>
+                                <option value="replied">Replied</option>
+                                <option value="forwarded">Forwarded to Admin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="feedback-list" id="staff-feedback-list">
+                        <!-- Feedback items will be loaded here -->
+                    </div>
+
+                    <!-- Feedback Reply Modal -->
+                    <div id="feedback-modal" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeFeedbackModal()">&times;</span>
+                            <h3>Feedback Details</h3>
+                            <div id="feedback-details">
+                                <!-- Feedback details will be populated here -->
+                            </div>
+                            <div class="feedback-actions">
+                                <button onclick="markAsRead()" class="action-btn">Mark as Read</button>
+                                <button onclick="forwardToAdmin()" class="action-btn">Forward to Admin</button>
+                                <button onclick="replyToFeedback()" class="action-btn">Reply</button>
+                            </div>
+                            <div id="reply-section" class="reply-section" style="display: none;">
+                                <textarea id="reply-text" placeholder="Type your reply here..." rows="4"></textarea>
+                                <button onclick="sendReply()" class="primary-btn">Send Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile-section" class="content-section">
+                <div class="profile-container">
+                    <h3>Staff Profile</h3>
+                    <form id="staff-profile-form" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profile-name">Full Name</label>
+                                <input type="text" id="profile-name" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profile-phone">Phone Number</label>
+                                <input type="tel" id="profile-phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-shift">Shift</label>
+                                <select id="profile-shift">
+                                    <option value="morning">Morning (6:00 AM - 2:00 PM)</option>
+                                    <option value="evening">Evening (2:00 PM - 10:00 PM)</option>
+                                    <option value="full">Full Day (6:00 AM - 10:00 PM)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-role">Role</label>
+                            <input type="text" id="profile-role" readonly>
+                        </div>
+                        <button type="submit" class="primary-btn">Update Profile</button>
+                    </form>
+                </div>
+
+                <!-- Change Password Section -->
+                <div class="profile-container" style="margin-top: 30px;">
+                    <h3>Change Password</h3>
+                    <form id="staff-change-password-form" class="profile-form">
+                        <div class="form-group">
+                            <label for="staff-current-password">Current Password</label>
+                            <input type="password" id="staff-current-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="staff-new-password">New Password</label>
+                            <input type="password" id="staff-new-password" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="staff-confirm-password">Confirm New Password</label>
+                            <input type="password" id="staff-confirm-password" required minlength="6">
+                        </div>
+                        <button type="submit" class="primary-btn">Change Password</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="js/staff-dashboard.js"></script>
+</body>
+</html>

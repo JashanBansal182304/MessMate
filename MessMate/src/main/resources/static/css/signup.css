@@ -1,0 +1,204 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+body, html {
+  height: 100%;
+  background-color: #1e1e2f;
+  color: #fff3e0;
+}
+
+/* Main container */
+.login-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Left panel with animated gradient */
+.login-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 50px;
+  color: #fff3e0;
+  background: linear-gradient(135deg, #2c2c44, #1e1e2f, #2c2c44);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.login-left h1 {
+  font-size: 2.8rem;
+  margin-bottom: 20px;
+  color: #fff3e0;
+}
+.login-left p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #ffdca3;
+}
+
+/* Right panel signup form */
+.login-right {
+  flex: 1.3;  /* ✅ make this slightly wider */
+  background-color: #2c2c44;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px; /* ✅ more breathing room */
+  overflow-y: auto; /* ✅ fixes overflow if content is long */
+}
+
+/* Form Styling */
+.login-right form {
+  width: 100%;
+  max-width: 420px; /* ✅ not too wide */
+}
+
+.login-right h2 {
+  margin-bottom: 30px;
+  color: #ff9a56;
+  text-align: center;
+}
+
+/* Floating labels */
+.form-group {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #1e1e2f;
+  color: #fff3e0;
+  font-size: 16px;
+  outline: none;
+}
+
+.form-group label {
+  position: absolute;
+  left: 15px;
+  top: 12px;
+  color: #ffd86f;
+  font-size: 14px;
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label,
+.form-group select:focus + label,
+.form-group select:not([value=""]) + label {
+  top: -10px;
+  left: 10px;
+  font-size: 12px;
+  color: #ff9a56;
+  background-color: #2c2c44;
+  padding: 0 5px;
+}
+
+/* Password toggle */
+.password-container {
+  position: relative;
+}
+#togglePassword {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #ffd86f;
+}
+
+/* Options (checkbox + link) */
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+.options label {
+  color: #ffd86f;
+}
+.options a {
+  color: #ff9a56;
+  text-decoration: none;
+}
+.options a:hover {
+  text-decoration: underline;
+}
+
+/* Signup Button */
+.login-right button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #ff9a56, #ffd86f);
+  border: none;
+  color: #1e1e2f;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.login-right button:hover {
+  background: linear-gradient(90deg, #ffd86f, #ff9a56);
+}
+
+/* Signup link */
+.signup-link {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ffd86f;
+}
+.signup-link a {
+  color: #ff9a56;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 5px;
+}
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Input hover glow */
+.form-group input:hover,
+.form-group select:hover {
+  box-shadow: 0 0 10px #ff9a56;
+  border-color: #ff9a56;
+  transition: 0.3s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+  .login-left, .login-right {
+    flex: unset;
+    width: 100%;
+    height: auto;
+    padding: 30px;
+  }
+}

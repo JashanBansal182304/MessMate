@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup | Mess Mate</title>
+  <link rel="stylesheet" href="css/signup.css">
+</head>
+<body>
+  <div class="login-container">
+    <!-- Left Panel -->
+    <div class="login-left">
+      <h1>🍴 Mess Mate</h1>
+      <p>Create your student account to access mess services.</p>
+    </div>
+
+    <!-- Right Panel (Signup Form) -->
+    <div class="login-right">
+      <form id="signupForm">
+        <h2>Student Signup</h2>
+
+        <!-- Full Name -->
+        <div class="form-group">
+          <input type="text" id="name" placeholder=" " required>
+          <label for="name">Full Name</label>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <input type="email" id="email" placeholder=" " required>
+          <label for="email">Email</label>
+        </div>
+
+        <!-- Roll No -->
+        <div class="form-group">
+          <input type="text" id="rollno" placeholder=" " required>
+          <label for="rollno">Roll Number</label>
+        </div>
+
+        <!-- Hostel -->
+        <div class="form-group">
+          <input type="text" id="hostel" placeholder=" " required>
+          <label for="hostel">Hostel</label>
+        </div>
+
+        <!-- Room -->
+        <div class="form-group">
+          <input type="text" id="room" placeholder=" " required>
+          <label for="room">Room Number</label>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group">
+          <input type="tel" id="phone" placeholder=" " required>
+          <label for="phone">Phone Number</label>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group password-container">
+          <input type="password" id="password" placeholder=" " required>
+          <label for="password">Password</label>
+          <span id="togglePassword">👁</span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <input type="password" id="confirm-password" placeholder=" " required>
+          <label for="confirm-password">Confirm Password</label>
+        </div>
+
+        <!-- Terms -->
+        <div class="options">
+          <label>
+            <input type="checkbox" id="terms" required> I agree to Mess Mate policies
+          </label>
+        </div>
+
+        <!-- Button -->
+        <button type="submit">Signup</button>
+
+        <!-- Redirect -->
+        <p class="signup-link">
+          Already have an account? <a href="login.html">Login</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/signup.js"></script>
+</body>
+</html>

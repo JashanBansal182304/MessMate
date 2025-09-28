@@ -1,0 +1,335 @@
+/* ======================
+   General Dark Theme
+====================== */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #1e1e2f;
+  color: #fdf6e3;
+  scroll-behavior: smooth;
+}
+
+/* ======================
+   Hero Section
+====================== */
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2c2c44, #1e1e2f);
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  color: #fff3e0;
+}
+
+.hero p {
+  font-size: 1.3rem;
+  margin-bottom: 30px;
+  color: #ffdca3;
+}
+
+/* ======================
+   Buttons – Improved Style
+====================== */
+.btn {
+  display: inline-block;
+  padding: 14px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Gradient Filled Button – Signup */
+.btn.big-btn, .cta .btn {
+  background: linear-gradient(135deg, #ff9a56, #ffd86f);
+  color: #1e1e2f;
+  box-shadow: 0 5px 15px rgba(255,154,86,0.5);
+}
+
+.btn.big-btn:hover, .cta .btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 25px rgba(255,154,86,0.7);
+}
+
+/* Outlined Button – Login */
+.btn-outline {
+  background: transparent;
+  border: 2px solid #ff9a56;
+  color: #ff9a56;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: linear-gradient(135deg, #ff9a56, #ffd86f);
+  color: #1e1e2f;
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(255,154,86,0.6);
+}
+
+/* Optional subtle shine effect for premium look */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255,255,255,0.1);
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
+  pointer-events: none;
+}
+
+.btn:hover::before {
+  top: -20%;
+  left: -20%;
+  background: rgba(255,255,255,0.2);
+}
+
+/* ======================
+   Floating Food Icons
+====================== */
+.floating-food {
+  position: absolute;
+  font-size: 3rem;
+  opacity: 0.8;
+  animation: float 15s infinite linear;
+  filter: drop-shadow(0 0 5px #ffb74d);
+}
+
+.floating-food:nth-child(1) { top: 20%; left: 10%; animation-duration: 12s; }
+.floating-food:nth-child(2) { top: 50%; left: 80%; animation-duration: 18s; }
+.floating-food:nth-child(3) { top: 70%; left: 30%; animation-duration: 14s; }
+.floating-food:nth-child(4) { top: 35%; left: 60%; animation-duration: 20s; }
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(10px, -15px) rotate(90deg); }
+  50% { transform: translate(-10px, -25px) rotate(180deg); }
+  75% { transform: translate(5px, -35px) rotate(270deg); }
+  100% { transform: translate(0, -50px) rotate(360deg); }
+}
+
+/* Plates animation */
+.plate {
+  position: absolute;
+  font-size: 2.5rem;
+  opacity: 0.7;
+  animation: floatPlate 12s infinite linear;
+  filter: drop-shadow(0 0 5px #ffdca3);
+}
+
+.plate:nth-child(4) { top: 60%; left: 15%; animation-duration: 14s; }
+.plate:nth-child(5) { top: 40%; left: 75%; animation-duration: 16s; }
+
+@keyframes floatPlate {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(8px, -20px) rotate(45deg); }
+  50% { transform: translate(-8px, -40px) rotate(90deg); }
+  75% { transform: translate(5px, -60px) rotate(135deg); }
+  100% { transform: translate(0, -80px) rotate(180deg); }
+}
+
+/* Steam animation */
+.steam {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.4;
+  animation: riseSteam 6s infinite;
+  color: #fff3e0;
+  filter: blur(1px);
+}
+
+.steam1 { bottom: 25%; left: 45%; animation-delay: 0s; }
+.steam2 { bottom: 25%; left: 50%; animation-delay: 1.5s; }
+.steam3 { bottom: 25%; left: 55%; animation-delay: 3s; }
+
+@keyframes riseSteam {
+  0% { transform: translateY(0) scale(0.8); opacity: 0.3; }
+  50% { transform: translateY(-30px) scale(1); opacity: 0.5; }
+  100% { transform: translateY(-60px) scale(1.2); opacity: 0; }
+}
+
+/* ======================
+   Sections
+====================== */
+section {
+  padding: 80px 20px;
+  max-width: 1000px;
+  margin: auto;
+  text-align: center;
+}
+
+/* Features Cards */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.card {
+  background: #2c2c44;
+  flex: 1 1 200px;
+  max-width: 220px;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  padding: 20px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(255,154,86,0.4);
+}
+
+.card span {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+/* Tooltip for feature cards */
+.card::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff9a56;
+  color: #1e1e2f;
+  padding: 6px 10px;
+  border-radius: 10px;
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  font-size: 0.85rem;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+/* About Section */
+.about-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.about-content img {
+  max-width: 300px;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(255,154,86,0.3);
+}
+
+/* Testimonials */
+.testi-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.testi-card {
+  background: #2c2c44;
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 250px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.testi-card img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+/* Menu Cards */
+.menu-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.menu-card {
+  background: #2c2c44;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  min-width: 150px;
+  transition: transform 0.4s, box-shadow 0.4s;
+}
+
+.menu-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(255,154,86,0.5);
+}
+
+/* CTA Section */
+.cta .btn {
+  margin: 10px;
+  border-radius: 50px;
+}
+
+/* Floating reaction icons for testimonials/CTA */
+.floating-reactions, .reaction-icons {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.6;
+  animation: floatReactions 8s infinite linear;
+}
+
+@keyframes floatReactions {
+  0% { transform: translate(0,0) rotate(0deg); }
+  25% { transform: translate(10px,-20px) rotate(45deg); }
+  50% { transform: translate(-10px,-40px) rotate(90deg); }
+  75% { transform: translate(5px,-60px) rotate(135deg); }
+  100% { transform: translate(0,-80px) rotate(180deg); }
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #2c2c44;
+  font-size: 0.9rem;
+  color: #ffdca3;
+}
+
+/* Fade-in Animations */
+.fade-in {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease-in-out;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cards, .testi-cards, .about-content { flex-direction: column; }
+}

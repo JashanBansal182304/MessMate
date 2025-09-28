@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Mess Mate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Student Info Section -->
+            <div class="student-info">
+                <div class="avatar">
+                    <span id="student-avatar">👤</span>
+                </div>
+                <div class="student-details">
+                    <h3 id="student-name">Loading...</h3>
+                    <p id="student-roll">Roll: Loading...</p>
+                    <p id="student-hostel">Hostel: Loading...</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-menu">
+                <ul>
+                    <li class="nav-item active" data-section="overview">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Overview</span>
+                    </li>
+                    <li class="nav-item" data-section="meal-booking">
+                        <span class="nav-icon">🍽️</span>
+                        <span class="nav-text">Meal Booking</span>
+                    </li>
+                    <li class="nav-item" data-section="feedback">
+                        <span class="nav-icon">💭</span>
+                        <span class="nav-text">Feedback</span>
+                    </li>
+                    <li class="nav-item" data-section="complaint">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">Complaints</span>
+                    </li>
+                    <li class="nav-item" data-section="profile">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Profile</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="logout-section">
+                <button id="logout-btn" class="logout-btn">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1 id="section-title">Dashboard Overview</h1>
+                <div class="header-actions">
+                    <span class="welcome-text">Welcome back! 👋</span>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <div class="content-wrapper">
+                <!-- Overview Section -->
+                <section id="overview-section" class="content-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🍽️</div>
+                            <div class="stat-info">
+                                <h3>Today's Meals</h3>
+                                <p id="todays-meals">3 Booked</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-info">
+                                <h3>This Week</h3>
+                                <p id="week-meals">18 Meals</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-info">
+                                <h3>Balance</h3>
+                                <p id="account-balance">₹2,450</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-info">
+                                <h3>Feedback Given</h3>
+                                <p id="feedback-count">12 Reviews</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" data-section="meal-booking">
+                                <span>🍽️</span> Book Meals
+                            </button>
+                            <button class="action-btn" data-section="feedback">
+                                <span>💭</span> Give Feedback
+                            </button>
+                            <button class="action-btn" data-section="complaint">
+                                <span>📝</span> File Complaint
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Meal Booking Section -->
+                <section id="meal-booking-section" class="content-section">
+                    <div class="meal-booking-container">
+                        <h3>Book Your Meals</h3>
+                        <div class="date-selector">
+                            <label for="booking-date">Select Date:</label>
+                            <input type="date" id="booking-date" min="" max="">
+                        </div>
+
+                        <div class="meals-grid">
+                            <div class="meal-card">
+                                <div class="meal-header">
+                                    <h4>🌅 Breakfast</h4>
+                                    <span class="meal-time">7:00 AM - 9:00 AM</span>
+                                </div>
+                                <div class="meal-content">
+                                    <p class="meal-menu">Idli, Sambar, Chutney, Tea/Coffee</p>
+                                    <div class="meal-actions">
+                                        <label class="meal-checkbox">
+                                            <input type="checkbox" id="breakfast-book" data-meal="breakfast">
+                                            <span class="checkmark"></span>
+                                            Book Breakfast
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="meal-card">
+                                <div class="meal-header">
+                                    <h4>☀️ Lunch</h4>
+                                    <span class="meal-time">12:00 PM - 2:00 PM</span>
+                                </div>
+                                <div class="meal-content">
+                                    <p class="meal-menu">Rice, Dal, Vegetables, Roti, Curd</p>
+                                    <div class="meal-actions">
+                                        <label class="meal-checkbox">
+                                            <input type="checkbox" id="lunch-book" data-meal="lunch">
+                                            <span class="checkmark"></span>
+                                            Book Lunch
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="meal-card">
+                                <div class="meal-header">
+                                    <h4>🌙 Dinner</h4>
+                                    <span class="meal-time">7:00 PM - 9:00 PM</span>
+                                </div>
+                                <div class="meal-content">
+                                    <p class="meal-menu">Rice, Dal, Curry, Roti, Salad</p>
+                                    <div class="meal-actions">
+                                        <label class="meal-checkbox">
+                                            <input type="checkbox" id="dinner-book" data-meal="dinner">
+                                            <span class="checkmark"></span>
+                                            Book Dinner
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="booking-summary">
+                            <button id="save-bookings" class="primary-btn">Save Bookings</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Feedback Section -->
+                <section id="feedback-section" class="content-section">
+                    <div class="feedback-container">
+                        <h3>Share Your Feedback</h3>
+                        <form id="feedback-form" class="form-container">
+                            <div class="form-group">
+                                <label for="feedback-type">Feedback Type</label>
+                                <select id="feedback-type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="FOOD_QUALITY">Food Quality</option>
+                                    <option value="SERVICE">Service</option>
+                                    <option value="CLEANLINESS">Cleanliness</option>
+                                    <option value="GENERAL">General</option>
+                                    <option value="COMPLAINT">Complaint</option>
+                                    <option value="SUGGESTION">Suggestion</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="feedback-rating">Rating</label>
+                                <div class="rating-container">
+                                    <span class="star" data-rating="1">⭐</span>
+                                    <span class="star" data-rating="2">⭐</span>
+                                    <span class="star" data-rating="3">⭐</span>
+                                    <span class="star" data-rating="4">⭐</span>
+                                    <span class="star" data-rating="5">⭐</span>
+                                </div>
+                                <input type="hidden" id="feedback-rating" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="feedback-message">Your Feedback</label>
+                                <textarea id="feedback-message" rows="5" placeholder="Share your thoughts..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="primary-btn">Submit Feedback</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Complaint Section -->
+                <section id="complaint-section" class="content-section">
+                    <div class="complaint-container">
+                        <h3>File a Complaint</h3>
+                        <form id="complaint-form" class="form-container">
+                            <div class="form-group">
+                                <label for="complaint-category">Complaint Category</label>
+                                <select id="complaint-category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="food-issue">Food Issue</option>
+                                    <option value="hygiene">Hygiene Problem</option>
+                                    <option value="staff-misconduct">Staff Misconduct</option>
+                                    <option value="billing">Billing Issue</option>
+                                    <option value="infrastructure">Infrastructure</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="complaint-priority">Priority Level</label>
+                                <select id="complaint-priority" required>
+                                    <option value="">Select Priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="complaint-subject">Subject</label>
+                                <input type="text" id="complaint-subject" placeholder="Brief description of the issue" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="complaint-description">Detailed Description</label>
+                                <textarea id="complaint-description" rows="6" placeholder="Provide detailed information about your complaint..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="primary-btn">Submit Complaint</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Profile Section -->
+                <section id="profile-section" class="content-section">
+                    <div class="profile-container">
+                        <h3>Profile Settings</h3>
+                        <form id="profile-form" class="form-container">
+                            <div class="form-group">
+                                <label for="profile-name">Full Name</label>
+                                <input type="text" id="profile-name" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile-roll">Roll Number</label>
+                                <input type="text" id="profile-roll" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile-hostel">Hostel</label>
+                                <input type="text" id="profile-hostel">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile-room">Room Number</label>
+                                <input type="text" id="profile-room">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile-phone">Phone Number</label>
+                                <input type="tel" id="profile-phone">
+                            </div>
+
+                            <button type="submit" class="primary-btn">Update Profile</button>
+                        </form>
+                    </div>
+
+                    <!-- Change Password Section -->
+                    <div class="profile-container" style="margin-top: 30px;">
+                        <h3>Change Password</h3>
+                        <form id="change-password-form" class="form-container">
+                            <div class="form-group">
+                                <label for="current-password">Current Password</label>
+                                <input type="password" id="current-password" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" required minlength="6">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm-password">Confirm New Password</label>
+                                <input type="password" id="confirm-password" required minlength="6">
+                            </div>
+
+                            <button type="submit" class="primary-btn">Change Password</button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
